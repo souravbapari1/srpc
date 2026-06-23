@@ -1,0 +1,23 @@
+{
+  "name": "srpc-client",
+  "version": "0.1.0",
+  "description": "Universal SRPC HTTP client — works in React, Vue, Angular, Vite, Next.js, and Node",
+  "type": "module",
+  "private": true,
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

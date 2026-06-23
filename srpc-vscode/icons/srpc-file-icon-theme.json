@@ -1,0 +1,14 @@
+{
+  "iconDefinitions": {
+    "_srpc_file": {
+      "iconPath": "./file.png"
+    }
+  },
+  "fileExtensions": {
+    "ctr": "_srpc_file",
+    "rpc": "_srpc_file"
+  },
+  "languageIds": {
+    "srpc": "_srpc_file"
+  }
+}

@@ -1,0 +1,111 @@
+package inventory
+
+enum StockMovementType {
+    INBOUND
+    OUTBOUND
+    ADJUSTMENT
+    RESERVATION
+    RELEASE
+    TRANSFER
+}
+
+struct Warehouse {
+    id: string
+    code: string
+    name: string
+    address: common.Address
+    isActive: boolean
+    createdAt: datetime
+}
+
+struct StockLevel {
+    id: string
+    warehouseId: string
+    productId: string
+    variantId: string
+    sku: string
+    quantityOnHand: int
+    quantityReserved: int
+    quantityAvailable: int
+    reorderPoint: int
+    updatedAt: datetime
+}
+
+struct StockMovement {
+    id: string
+    warehouseId: string
+    variantId: string
+    type: StockMovementType
+    quantity: int
+    referenceId?: string
+    note?: string
+    createdAt: datetime
+    createdBy?: string
+}
+
+struct AdjustStockRequest {
+    warehouseId: string
+    variantId: string
+    quantity: int
+    type: StockMovementType
+    note?: string
+}
+
+struct ReserveStockRequest {
+    orderId: string
+    items: cart.CartItem[]
+}
+
+struct ReleaseStockRequest {
+    orderId: string
+}
+
+struct StockListRequest {
+    pagination: common.PaginationRequest
+    warehouseId?: string
+    productId?: string
+    variantId?: string
+    lowStockOnly?: boolean
+}
+
+struct StockListResponse {
+    items: StockLevel[]
+    meta: common.PaginationMeta
+}
+
+struct WarehouseListResponse {
+    items: Warehouse[]
+    meta: common.PaginationMeta
+}
+
+struct StockMovementListResponse {
+    items: StockMovement[]
+    meta: common.PaginationMeta
+}
+
+service InventoryService {
+    @get getStock(
+        data: common.IdRequest
+    ) => StockLevel
+    @get listStock(
+        data: StockListRequest
+    ) => StockListResponse
+    @post adjustStock(
+        data: AdjustStockRequest
+    ) => StockLevel
+    @post reserveStock(
+        data: ReserveStockRequest
+    ) => StockListResponse
+    @post releaseStock(
+        data: ReleaseStockRequest
+    ) => common.EmptyResponse
+    @get listWarehouses(
+        data: common.PaginationRequest
+    ) => WarehouseListResponse
+    @get getWarehouse(
+        data: common.IdRequest
+    ) => Warehouse
+    @get listMovements(
+        data: StockListRequest
+    ) => StockMovementListResponse
+}

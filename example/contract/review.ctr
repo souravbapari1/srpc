@@ -1,0 +1,94 @@
+package review
+
+enum ReviewStatus {
+    PENDING
+    APPROVED
+    REJECTED
+    FLAGGED
+}
+
+struct Review {
+    id: string
+    productId: string
+    userId: string
+    orderId?: string
+    rating: int
+    title?: string
+    body: string
+    status: ReviewStatus
+    helpfulCount: int
+    images: common.ImageAsset[]
+    verifiedPurchase: boolean
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct CreateReviewRequest {
+    productId: string
+    userId: string
+    orderId?: string
+    rating: int
+    title?: string
+    body: string
+    imageUrls?: string[]
+}
+
+struct UpdateReviewRequest {
+    reviewId: string
+    rating?: int
+    title?: string
+    body?: string
+}
+
+struct ModerateReviewRequest {
+    reviewId: string
+    status: ReviewStatus
+    note?: string
+}
+
+struct ReviewListRequest {
+    pagination: common.PaginationRequest
+    productId?: string
+    userId?: string
+    status?: ReviewStatus
+    minRating?: int
+}
+
+struct ReviewListResponse {
+    items: Review[]
+    meta: common.PaginationMeta
+}
+
+struct ProductRatingSummary {
+    productId: string
+    averageRating: float
+    totalReviews: int
+    ratingBreakdown: map<string, int>
+}
+
+service ReviewService {
+    @get listReviews(
+        data: ReviewListRequest
+    ) => ReviewListResponse
+    @get getReview(
+        data: common.IdRequest
+    ) => Review
+    @post createReview(
+        data: CreateReviewRequest
+    ) => Review
+    @put updateReview(
+        data: UpdateReviewRequest
+    ) => Review
+    @delete deleteReview(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+    @post moderateReview(
+        data: ModerateReviewRequest
+    ) => Review
+    @post markHelpful(
+        data: common.IdRequest
+    ) => Review
+    @get getProductRatingSummary(
+        data: common.IdRequest
+    ) => ProductRatingSummary
+}

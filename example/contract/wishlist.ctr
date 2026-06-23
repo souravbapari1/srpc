@@ -1,0 +1,75 @@
+package wishlist
+
+struct WishlistItem {
+    id: string
+    productId: string
+    variantId?: string
+    title: string
+    imageUrl?: string
+    price: common.Money
+    addedAt: datetime
+}
+
+struct Wishlist {
+    id: string
+    userId: string
+    name: string
+    isDefault: boolean
+    isPublic: boolean
+    items: WishlistItem[]
+    itemCount: int
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct CreateWishlistRequest {
+    userId: string
+    name: string
+    isPublic?: boolean
+}
+
+struct AddWishlistItemRequest {
+    wishlistId: string
+    productId: string
+    variantId?: string
+}
+
+struct MoveToCartRequest {
+    wishlistId: string
+    itemId: string
+    cartId?: string
+}
+
+struct WishlistListRequest {
+    pagination: common.PaginationRequest
+    userId: string
+}
+
+struct WishlistListResponse {
+    items: Wishlist[]
+    meta: common.PaginationMeta
+}
+
+service WishlistService {
+    @get listWishlists(
+        data: WishlistListRequest
+    ) => WishlistListResponse
+    @get getWishlist(
+        data: common.IdRequest
+    ) => Wishlist
+    @post createWishlist(
+        data: CreateWishlistRequest
+    ) => Wishlist
+    @post addItem(
+        data: AddWishlistItemRequest
+    ) => Wishlist
+    @delete removeItem(
+        data: MoveToCartRequest
+    ) => Wishlist
+    @post moveItemToCart(
+        data: MoveToCartRequest
+    ) => cart.Cart
+    @delete deleteWishlist(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+}

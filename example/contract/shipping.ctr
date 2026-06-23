@@ -1,0 +1,132 @@
+package shipping
+
+enum ShipmentStatus {
+    LABEL_CREATED
+    PICKED_UP
+    IN_TRANSIT
+    OUT_FOR_DELIVERY
+    DELIVERED
+    FAILED_ATTEMPT
+    RETURNED
+    CANCELLED
+}
+
+enum ShippingRateType {
+    FLAT
+    WEIGHT_BASED
+    PRICE_BASED
+    FREE
+}
+
+struct ShippingMethod {
+    id: string
+    code: string
+    name: string
+    description?: string
+    rateType: ShippingRateType
+    basePrice: common.Money
+    estimatedDaysMin: int
+    estimatedDaysMax: int
+    isActive: boolean
+    supportedCountries: string[]
+}
+
+struct ShipmentItem {
+    orderItemId: string
+    quantity: int
+    sku: string
+}
+
+struct TrackingEvent {
+    id: string
+    status: ShipmentStatus
+    message: string
+    location?: string
+    occurredAt: datetime
+}
+
+struct Shipment {
+    id: string
+    orderId: string
+    methodId: string
+    status: ShipmentStatus
+    trackingNumber?: string
+    carrier?: string
+    items: ShipmentItem[]
+    events: TrackingEvent[]
+    shippedAt?: datetime
+    deliveredAt?: datetime
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct QuoteShippingRequest {
+    cartId?: string
+    orderId?: string
+    address: common.Address
+    methodIds?: string[]
+}
+
+struct ShippingQuote {
+    methodId: string
+    methodName: string
+    price: common.Money
+    estimatedDeliveryAt: datetime
+}
+
+struct QuoteShippingResponse {
+    quotes: ShippingQuote[]
+}
+
+struct CreateShipmentRequest {
+    orderId: string
+    methodId: string
+    itemIds: string[]
+}
+
+struct UpdateShipmentStatusRequest {
+    shipmentId: string
+    status: ShipmentStatus
+    message?: string
+    location?: string
+}
+
+struct ShipmentListRequest {
+    pagination: common.PaginationRequest
+    orderId?: string
+    status?: ShipmentStatus
+}
+
+struct ShipmentListResponse {
+    items: Shipment[]
+    meta: common.PaginationMeta
+}
+
+struct ShippingMethodListResponse {
+    items: ShippingMethod[]
+    meta: common.PaginationMeta
+}
+
+service ShippingService {
+    @get listMethods(
+        data: common.PaginationRequest
+    ) => ShippingMethodListResponse
+    @post quoteShipping(
+        data: QuoteShippingRequest
+    ) => QuoteShippingResponse
+    @post createShipment(
+        data: CreateShipmentRequest
+    ) => Shipment
+    @get getShipment(
+        data: common.IdRequest
+    ) => Shipment
+    @get listShipments(
+        data: ShipmentListRequest
+    ) => ShipmentListResponse
+    @patch updateShipmentStatus(
+        data: UpdateShipmentStatusRequest
+    ) => Shipment
+    @get trackShipment(
+        data: common.IdRequest
+    ) => Shipment
+}

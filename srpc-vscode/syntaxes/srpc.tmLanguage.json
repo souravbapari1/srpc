@@ -1,0 +1,96 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "SRPC",
+  "scopeName": "source.srpc",
+  "patterns": [
+    { "include": "#declarations" }
+  ],
+  "repository": {
+    "declarations": {
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#string-literals" },
+        { "include": "#keywords" },
+        { "include": "#types" },
+        { "include": "#identifiers" },
+        { "include": "#punctuation" }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.srpc",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "string-literals": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.srpc",
+          "match": "\"[^\"]*\""
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.srpc",
+          "match": "\\b(enum|struct|service|map|list|package|null)\\b"
+        },
+        {
+          "name": "keyword.decorator.http.srpc",
+          "match": "@(get|post|put|patch|delete)\\b"
+        },
+        {
+          "name": "keyword.operator.srpc",
+          "match": "=>|\\|"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.srpc",
+          "match": "\\b(string|number|boolean|datetime|date|int|float|bytes|any)\\b"
+        },
+        {
+          "name": "entity.name.type.srpc",
+          "match": "\\b[A-Z][A-Za-z0-9]*\\b"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "entity.name.function.srpc",
+          "match": "(?<=^|\\s)[a-z][A-Za-z0-9]*(?=\\s*\\()"
+        },
+        {
+          "name": "variable.other.property.srpc",
+          "match": "(?<=^|\\s)[a-z][A-Za-z0-9]*\\??(?=\\s*:)"
+        },
+        {
+          "name": "constant.other.enum.srpc",
+          "match": "(?<=^\\s+)[A-Z][A-Z0-9_]*(?=\\s*$)"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.section.braces.srpc",
+          "match": "[{}\\[\\]]"
+        },
+        {
+          "name": "punctuation.section.parens.srpc",
+          "match": "[()]"
+        },
+        {
+          "name": "punctuation.separator.srpc",
+          "match": "[:,]"
+        }
+      ]
+    }
+  }
+}

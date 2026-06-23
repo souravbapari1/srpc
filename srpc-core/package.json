@@ -1,0 +1,31 @@
+{
+  "name": "srpc-core",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "main": "index.ts",
+  "bin": {
+    "srpc-core": "./cli.ts"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./rpc": "./rpc/index.ts"
+  },
+  "scripts": {
+    "generate": "bun cli.ts --contract-dir ../example/contract --out ../example/generated/srpc-types.ts",
+    "test": "bun test",
+    "rpc:server": "bun ../example/index.ts",
+    "rpc:client": "bun ../example/rpc/user.ts",
+    "rpc:browser": "bun --hot rpc/example/browser.html"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

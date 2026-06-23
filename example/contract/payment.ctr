@@ -1,0 +1,146 @@
+package payment
+
+enum PaymentMethodType {
+    CARD
+    UPI
+    WALLET
+    NET_BANKING
+    COD
+    GIFT_CARD
+}
+
+enum PaymentTransactionStatus {
+    INITIATED
+    AUTHORIZED
+    CAPTURED
+    FAILED
+    VOIDED
+    REFUNDED
+    PARTIALLY_REFUNDED
+}
+
+enum RefundStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    FAILED
+}
+
+struct PaymentMethod {
+    id: string
+    userId: string
+    type: PaymentMethodType
+    label: string
+    last4?: string
+    brand?: string
+    expiryMonth?: int
+    expiryYear?: int
+    isDefault: boolean
+    createdAt: datetime
+}
+
+struct PaymentTransaction {
+    id: string
+    orderId: string
+    userId: string
+    methodId: string
+    amount: common.Money
+    status: PaymentTransactionStatus
+    gatewayReference?: string
+    failureReason?: string
+    authorizedAt?: datetime
+    capturedAt?: datetime
+    createdAt: datetime
+}
+
+struct Refund {
+    id: string
+    paymentId: string
+    orderId: string
+    amount: common.Money
+    status: RefundStatus
+    reason: string
+    processedAt?: datetime
+    createdAt: datetime
+}
+
+struct CreatePaymentMethodRequest {
+    userId: string
+    type: PaymentMethodType
+    token: string
+    label: string
+    isDefault?: boolean
+}
+
+struct AuthorizePaymentRequest {
+    orderId: string
+    methodId: string
+    amount: common.Money
+}
+
+struct CapturePaymentRequest {
+    paymentId: string
+    amount?: common.Money
+}
+
+struct CreateRefundRequest {
+    paymentId: string
+    amount: common.Money
+    reason: string
+}
+
+struct PaymentListRequest {
+    pagination: common.PaginationRequest
+    userId?: string
+    orderId?: string
+    status?: PaymentTransactionStatus
+}
+
+struct PaymentListResponse {
+    items: PaymentTransaction[]
+    meta: common.PaginationMeta
+}
+
+struct PaymentMethodListResponse {
+    items: PaymentMethod[]
+    meta: common.PaginationMeta
+}
+
+service PaymentService {
+    @post authorize(
+        data: AuthorizePaymentRequest
+    ) => PaymentTransaction
+    @post capture(
+        data: CapturePaymentRequest
+    ) => PaymentTransaction
+    @post voidPayment(
+        data: common.IdRequest
+    ) => PaymentTransaction
+    @get getPayment(
+        data: common.IdRequest
+    ) => PaymentTransaction
+    @get listPayments(
+        data: PaymentListRequest
+    ) => PaymentListResponse
+    @post createRefund(
+        data: CreateRefundRequest
+    ) => Refund
+    @get getRefund(
+        data: common.IdRequest
+    ) => Refund
+}
+
+service PaymentMethodService {
+    @get listMethods(
+        data: common.IdRequest
+    ) => PaymentMethodListResponse
+    @post addMethod(
+        data: CreatePaymentMethodRequest
+    ) => PaymentMethod
+    @delete removeMethod(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+    @patch setDefaultMethod(
+        data: common.IdRequest
+    ) => PaymentMethod
+}

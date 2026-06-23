@@ -1,0 +1,78 @@
+package notification
+
+enum NotificationChannel {
+    EMAIL
+    SMS
+    PUSH
+    IN_APP
+}
+
+enum NotificationStatus {
+    PENDING
+    SENT
+    DELIVERED
+    FAILED
+    READ
+}
+
+struct Notification {
+    id: string
+    userId: string
+    channel: NotificationChannel
+    status: NotificationStatus
+    title: string
+    body: string
+    actionUrl?: string
+    metadata?: map<string, string>
+    readAt?: datetime
+    sentAt?: datetime
+    createdAt: datetime
+}
+
+struct SendNotificationRequest {
+    userId: string
+    channel: NotificationChannel
+    title: string
+    body: string
+    actionUrl?: string
+    metadata?: map<string, string>
+}
+
+struct NotificationListRequest {
+    pagination: common.PaginationRequest
+    userId: string
+    channel?: NotificationChannel
+    status?: NotificationStatus
+    unreadOnly?: boolean
+}
+
+struct NotificationListResponse {
+    items: Notification[]
+    meta: common.PaginationMeta
+}
+
+struct MarkNotificationsReadRequest {
+    userId: string
+    notificationIds: string[]
+}
+
+service NotificationService {
+    @get listNotifications(
+        data: NotificationListRequest
+    ) => NotificationListResponse
+    @get getNotification(
+        data: common.IdRequest
+    ) => Notification
+    @post sendNotification(
+        data: SendNotificationRequest
+    ) => Notification
+    @post markAsRead(
+        data: MarkNotificationsReadRequest
+    ) => NotificationListResponse
+    @post markAllAsRead(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+    @delete deleteNotification(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+}

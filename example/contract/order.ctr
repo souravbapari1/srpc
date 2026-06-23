@@ -1,0 +1,148 @@
+package order
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    PROCESSING
+    SHIPPED
+    DELIVERED
+    CANCELLED
+    REFUNDED
+    RETURNED
+}
+
+enum FulfillmentStatus {
+    UNFULFILLED
+    PARTIALLY_FULFILLED
+    FULFILLED
+    RESTOCKED
+}
+
+enum OrderPaymentStatus {
+    PENDING
+    AUTHORIZED
+    PAID
+    PARTIALLY_REFUNDED
+    REFUNDED
+    FAILED
+}
+
+struct OrderItem {
+    id: string
+    productId: string
+    variantId: string
+    sku: string
+    title: string
+    quantity: int
+    unitPrice: common.Money
+    discountAmount: common.Money
+    taxAmount: common.Money
+    lineTotal: common.Money
+    imageUrl?: string
+    fulfillmentStatus: FulfillmentStatus
+}
+
+struct OrderTotals {
+    subtotal: common.Money
+    discountTotal: common.Money
+    taxTotal: common.Money
+    shippingTotal: common.Money
+    grandTotal: common.Money
+}
+
+struct OrderAddressSnapshot {
+    shipping: common.Address
+    billing: common.Address
+}
+
+struct OrderTimelineEvent {
+    id: string
+    status: OrderStatus
+    message: string
+    createdAt: datetime
+    createdBy?: string
+}
+
+struct Order {
+    id: string
+    orderNumber: string
+    userId: string
+    status: OrderStatus
+    paymentStatus: OrderPaymentStatus
+    fulfillmentStatus: FulfillmentStatus
+    items: OrderItem[]
+    totals: OrderTotals
+    addresses: OrderAddressSnapshot
+    couponCode?: string
+    notes?: string
+    timeline: OrderTimelineEvent[]
+    placedAt: datetime
+    paidAt?: datetime
+    shippedAt?: datetime
+    deliveredAt?: datetime
+    cancelledAt?: datetime
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct CheckoutRequest {
+    cartId: string
+    shippingAddressId: string
+    billingAddressId: string
+    shippingMethodId: string
+    paymentMethodId: string
+    notes?: string
+}
+
+struct OrderListRequest {
+    pagination: common.PaginationRequest
+    userId?: string
+    status?: OrderStatus
+    paymentStatus?: OrderPaymentStatus
+    dateRange?: common.DateRange
+    orderNumber?: string
+}
+
+struct OrderListResponse {
+    items: Order[]
+    meta: common.PaginationMeta
+}
+
+struct CancelOrderRequest {
+    orderId: string
+    reason: string
+}
+
+struct UpdateOrderStatusRequest {
+    orderId: string
+    status: OrderStatus
+    message?: string
+}
+
+struct OrderTimelineResponse {
+    events: OrderTimelineEvent[]
+}
+
+service OrderService {
+    @post checkout(
+        data: CheckoutRequest
+    ) => Order
+    @get getOrder(
+        data: common.IdRequest
+    ) => Order
+    @get listOrders(
+        data: OrderListRequest
+    ) => OrderListResponse
+    @patch updateOrderStatus(
+        data: UpdateOrderStatusRequest
+    ) => Order
+    @post cancelOrder(
+        data: CancelOrderRequest
+    ) => Order
+    @post reorder(
+        data: common.IdRequest
+    ) => CheckoutRequest
+    @get getOrderTimeline(
+        data: common.IdRequest
+    ) => OrderTimelineResponse
+}

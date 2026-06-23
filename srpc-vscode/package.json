@@ -1,0 +1,94 @@
+{
+  "name": "srpc-vscode",
+  "displayName": "SRPC",
+  "description": "Language support for SRPC contract files (.ctr)",
+  "version": "0.0.1",
+  "publisher": "srpc",
+  "icon": "logo.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:srpc",
+    "workspaceContains:**/*.ctr",
+    "workspaceContains:**/*.rpc"
+  ],
+  "main": "./client/out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "srpc",
+        "aliases": [
+          "SRPC",
+          "SRPC DSL"
+        ],
+        "extensions": [
+          ".ctr",
+          ".rpc"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "srpc",
+        "scopeName": "source.srpc",
+        "path": "./syntaxes/srpc.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[srpc]": {
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": true
+        },
+        "editor.suggest.showKeywords": true,
+        "editor.wordBasedSuggestions": "off"
+      }
+    },
+    "iconThemes": [
+      {
+        "id": "srpc-file-icons",
+        "label": "SRPC File Icons",
+        "path": "./icons/srpc-file-icon-theme.json"
+      }
+    ],
+    "configuration": {
+      "title": "SRPC",
+      "properties": {
+        "srpc.enableFileIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use the SRPC file icon for .ctr and .rpc files."
+        },
+        "srpc.autoPackage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically add a unique package declaration to new empty .ctr/.rpc files."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node scripts/build.mjs",
+    "typecheck": "tsc -b",
+    "watch": "node scripts/build.mjs --watch",
+    "package": "bun run compile && bunx @vscode/vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.25.9",
+    "typescript": "^5.9.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12",
+    "vscode-uri": "^3.1.0"
+  }
+}

@@ -1,0 +1,109 @@
+package cart
+
+enum CartStatus {
+    ACTIVE
+    MERGED
+    CONVERTED
+    ABANDONED
+}
+
+struct CartItem {
+    id: string
+    productId: string
+    variantId: string
+    sku: string
+    title: string
+    quantity: int
+    unitPrice: common.Money
+    lineTotal: common.Money
+    imageUrl?: string
+    attributes: map<string, string>
+    addedAt: datetime
+}
+
+struct CartTotals {
+    subtotal: common.Money
+    discountTotal: common.Money
+    taxTotal: common.Money
+    shippingTotal: common.Money
+    grandTotal: common.Money
+    itemCount: int
+}
+
+struct Cart {
+    id: string
+    userId?: string
+    sessionId?: string
+    status: CartStatus
+    items: CartItem[]
+    couponCode?: string
+    totals: CartTotals
+    currency: common.CurrencyCode
+    expiresAt?: datetime
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct GetCartRequest {
+    cartId?: string
+    sessionId?: string
+}
+
+struct AddCartItemRequest {
+    cartId?: string
+    sessionId?: string
+    productId: string
+    variantId: string
+    quantity: int
+}
+
+struct UpdateCartItemRequest {
+    cartId: string
+    itemId: string
+    quantity: int
+}
+
+struct RemoveCartItemRequest {
+    cartId: string
+    itemId: string
+}
+
+struct ApplyCouponRequest {
+    cartId: string
+    couponCode: string
+}
+
+struct MergeCartRequest {
+    sessionCartId: string
+    userId: string
+}
+
+service CartService {
+    @get getCart(
+        data: GetCartRequest
+    ) => Cart
+    @post addItem(
+        data: AddCartItemRequest
+    ) => Cart
+    @patch updateItem(
+        data: UpdateCartItemRequest
+    ) => Cart
+    @delete removeItem(
+        data: RemoveCartItemRequest
+    ) => Cart
+    @delete clearCart(
+        data: common.IdRequest
+    ) => Cart
+    @post applyCoupon(
+        data: ApplyCouponRequest
+    ) => Cart
+    @delete removeCoupon(
+        data: common.IdRequest
+    ) => Cart
+    @post mergeCart(
+        data: MergeCartRequest
+    ) => Cart
+    @post estimateTotals(
+        data: common.IdRequest
+    ) => CartTotals
+}

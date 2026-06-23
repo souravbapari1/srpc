@@ -1,0 +1,97 @@
+package common
+
+enum SortDirection {
+    ASC
+    DESC
+}
+
+enum CurrencyCode {
+    USD
+    EUR
+    GBP
+    INR
+    JPY
+}
+
+struct Money {
+    amount: int
+    currency: CurrencyCode
+}
+
+struct Address {
+    id?: string
+    label?: string
+    line1: string
+    line2?: string
+    city: string
+    state?: string
+    postalCode: string
+    country: string
+    phone?: string
+    isDefault?: boolean
+}
+
+struct GeoPoint {
+    latitude: float
+    longitude: float
+}
+
+struct PaginationRequest {
+    page: int
+    pageSize: int
+    sortBy?: string
+    sortDirection?: SortDirection
+}
+
+struct PaginationMeta {
+    page: int
+    pageSize: int
+    totalItems: int
+    totalPages: int
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+}
+
+struct IdRequest {
+    id: string
+}
+
+struct SlugRequest {
+    slug: string
+}
+
+struct BulkIdsRequest {
+    ids: string[]
+}
+
+struct EmptyResponse {
+    success: boolean
+}
+
+struct ApiError {
+    code: string
+    message: string
+    field?: string
+    details?: map<string, string>
+}
+
+struct DateRange {
+    from: datetime
+    to: datetime
+}
+
+struct ImageAsset {
+    id: string
+    url: string
+    alt?: string
+    width?: int
+    height?: int
+    sortOrder?: int
+}
+
+struct AuditFields {
+    createdAt: datetime
+    updatedAt: datetime
+    createdBy?: string
+    updatedBy?: string
+}

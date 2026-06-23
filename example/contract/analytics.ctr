@@ -1,0 +1,87 @@
+package analytics
+
+struct SalesSummary {
+    totalRevenue: common.Money
+    totalOrders: int
+    averageOrderValue: common.Money
+    conversionRate: float
+    returningCustomerRate: float
+}
+
+struct TopProductStat {
+    productId: string
+    title: string
+    unitsSold: int
+    revenue: common.Money
+}
+
+struct CategorySalesStat {
+    categoryId: string
+    name: string
+    revenue: common.Money
+    orderCount: int
+}
+
+struct CustomerStat {
+    newCustomers: int
+    activeCustomers: int
+    churnedCustomers: int
+}
+
+struct DashboardRequest {
+    dateRange: common.DateRange
+    storeId?: string
+}
+
+struct DashboardResponse {
+    sales: SalesSummary
+    topProducts: TopProductStat[]
+    topCategories: CategorySalesStat[]
+    customers: CustomerStat
+    lowStockCount: int
+    pendingOrders: int
+    pendingReviews: int
+}
+
+struct RevenueReportRequest {
+    dateRange: common.DateRange
+    groupBy: string
+}
+
+struct RevenueDataPoint {
+    label: string
+    revenue: common.Money
+    orderCount: int
+}
+
+struct RevenueReportResponse {
+    points: RevenueDataPoint[]
+    total: common.Money
+}
+
+service AnalyticsService {
+    @get getDashboard(
+        data: DashboardRequest
+    ) => DashboardResponse
+    @get getRevenueReport(
+        data: RevenueReportRequest
+    ) => RevenueReportResponse
+    @get getTopProducts(
+        data: DashboardRequest
+    ) => TopProductStat[]
+    @get getCustomerStats(
+        data: DashboardRequest
+    ) => CustomerStat
+}
+
+service ReportService {
+    @get exportOrders(
+        data: RevenueReportRequest
+    ) => common.EmptyResponse
+    @get exportInventory(
+        data: DashboardRequest
+    ) => common.EmptyResponse
+    @get exportCustomers(
+        data: DashboardRequest
+    ) => common.EmptyResponse
+}

@@ -1,0 +1,146 @@
+package promotion
+
+enum DiscountType {
+    PERCENTAGE
+    FIXED_AMOUNT
+    FREE_SHIPPING
+    BUY_X_GET_Y
+}
+
+enum CouponStatus {
+    ACTIVE
+    SCHEDULED
+    EXPIRED
+    DISABLED
+}
+
+enum PromotionTarget {
+    CART
+    PRODUCT
+    CATEGORY
+    SHIPPING
+}
+
+struct Coupon {
+    id: string
+    code: string
+    description?: string
+    discountType: DiscountType
+    discountValue: int
+    status: CouponStatus
+    minOrderAmount?: common.Money
+    maxDiscountAmount?: common.Money
+    usageLimit?: int
+    usageCount: int
+    perUserLimit?: int
+    startsAt?: datetime
+    endsAt?: datetime
+    createdAt: datetime
+}
+
+struct Promotion {
+    id: string
+    name: string
+    description?: string
+    target: PromotionTarget
+    targetIds: string[]
+    discountType: DiscountType
+    discountValue: int
+    isActive: boolean
+    priority: int
+    startsAt?: datetime
+    endsAt?: datetime
+    createdAt: datetime
+}
+
+struct ValidateCouponRequest {
+    code: string
+    cartId: string
+    userId?: string
+}
+
+struct ValidateCouponResponse {
+    valid: boolean
+    coupon?: Coupon
+    discountAmount?: common.Money
+    message?: string
+}
+
+struct CreateCouponRequest {
+    code: string
+    discountType: DiscountType
+    discountValue: int
+    minOrderAmount?: common.Money
+    usageLimit?: int
+    startsAt?: datetime
+    endsAt?: datetime
+}
+
+struct CreatePromotionRequest {
+    name: string
+    target: PromotionTarget
+    targetIds: string[]
+    discountType: DiscountType
+    discountValue: int
+    priority?: int
+    startsAt?: datetime
+    endsAt?: datetime
+}
+
+struct CouponListRequest {
+    pagination: common.PaginationRequest
+    status?: CouponStatus
+    query?: string
+}
+
+struct CouponListResponse {
+    items: Coupon[]
+    meta: common.PaginationMeta
+}
+
+struct PromotionListResponse {
+    items: Promotion[]
+    meta: common.PaginationMeta
+}
+
+service CouponService {
+    @post validateCoupon(
+        data: ValidateCouponRequest
+    ) => ValidateCouponResponse
+    @get getCoupon(
+        data: common.IdRequest
+    ) => Coupon
+    @get listCoupons(
+        data: CouponListRequest
+    ) => CouponListResponse
+    @post createCoupon(
+        data: CreateCouponRequest
+    ) => Coupon
+    @put updateCoupon(
+        data: CreateCouponRequest
+    ) => Coupon
+    @delete deleteCoupon(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+}
+
+service PromotionService {
+    @get listPromotions(
+        data: common.PaginationRequest
+    ) => PromotionListResponse
+    @get getPromotion(
+        data: common.IdRequest
+    ) => Promotion
+    @post createPromotion(
+        data: CreatePromotionRequest
+    ) => Promotion
+    @put updatePromotion(
+        data: CreatePromotionRequest
+    ) => Promotion
+    @delete deletePromotion(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+    @get getActivePromotions(
+        data: common.EmptyResponse
+    ) => PromotionListResponse
+}

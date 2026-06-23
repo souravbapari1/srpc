@@ -1,0 +1,21 @@
+{
+  "name": "example",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run generate && bun run --watch index.ts",
+    "generate": "srpc-core generate"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "srpc-client": "file:../srpc-client",
+    "srpc-core": "file:../srpc-core"
+  }
+}

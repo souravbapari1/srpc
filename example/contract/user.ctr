@@ -1,0 +1,163 @@
+package user
+
+enum UserRole {
+    CUSTOMER
+    SELLER
+    ADMIN
+    SUPPORT
+}
+
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+    PENDING_VERIFICATION
+}
+
+struct UserPreferences {
+    locale: string
+    currency: common.CurrencyCode
+    marketingEmails: boolean
+    smsNotifications: boolean
+    pushNotifications: boolean
+}
+
+struct UserProfile {
+    firstName: string
+    lastName: string
+    displayName?: string
+    avatarUrl?: string
+    phone?: string
+    dateOfBirth?: date
+}
+
+struct User {
+    id: string
+    email: string
+    role: UserRole
+    status: UserStatus
+    profile: UserProfile
+    preferences: UserPreferences
+    addresses: common.Address[]
+    defaultAddressId?: string
+    favoriteProductIds: string[]
+    lastLoginAt?: datetime
+    emailVerifiedAt?: datetime
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct UserRequest {
+    id: string
+}
+
+struct RegisterUserRequest {
+    email: string
+    password: string
+    profile: UserProfile
+    preferences?: UserPreferences
+}
+
+struct LoginRequest {
+    email: string
+    password: string
+}
+
+struct LoginResponse {
+    accessToken: string
+    refreshToken: string
+    expiresAt: datetime
+    user: User
+}
+
+struct RefreshTokenRequest {
+    refreshToken: string
+}
+
+struct UpdateProfileRequest {
+    userId: string
+    profile: UserProfile
+}
+
+struct ChangePasswordRequest {
+    userId: string
+    currentPassword: string
+    newPassword: string
+}
+
+struct AddAddressRequest {
+    userId: string
+    address: common.Address
+}
+
+struct UpdateAddressRequest {
+    userId: string
+    addressId: string
+    address: common.Address
+}
+
+struct UserListRequest {
+    pagination: common.PaginationRequest
+    role?: UserRole
+    status?: UserStatus
+    query?: string
+}
+
+struct UserListResponse {
+    items: User[]
+    meta: common.PaginationMeta
+}
+
+service UserService {
+    @get getUser(
+        data: UserRequest
+    ) => User
+    @get listUsers(
+        data: UserListRequest
+    ) => UserListResponse
+    @post createUser(
+        data: RegisterUserRequest
+    ) => User
+    @put updateUser(
+        data: UpdateProfileRequest
+    ) => User
+    @patch updateUserStatus(
+        data: UserRequest
+    ) => User
+    @delete deleteUser(
+        data: UserRequest
+    ) => common.EmptyResponse
+    @post addAddress(
+        data: AddAddressRequest
+    ) => User
+    @put updateAddress(
+        data: UpdateAddressRequest
+    ) => User
+    @delete removeAddress(
+        data: UpdateAddressRequest
+    ) => User
+}
+
+service AuthService {
+    @post register(
+        data: RegisterUserRequest
+    ) => LoginResponse
+    @post login(
+        data: LoginRequest
+    ) => LoginResponse
+    @post logout(
+        data: RefreshTokenRequest
+    ) => common.EmptyResponse
+    @post refreshToken(
+        data: RefreshTokenRequest
+    ) => LoginResponse
+    @post changePassword(
+        data: ChangePasswordRequest
+    ) => common.EmptyResponse
+    @post verifyEmail(
+        data: common.IdRequest
+    ) => User
+    @post requestPasswordReset(
+        data: LoginRequest
+    ) => common.EmptyResponse
+}

@@ -1,0 +1,231 @@
+package catalog
+
+enum ProductStatus {
+    DRAFT
+    ACTIVE
+    ARCHIVED
+    OUT_OF_STOCK
+}
+
+enum ProductVisibility {
+    PUBLIC
+    HIDDEN
+    SCHEDULED
+}
+
+struct ProductDimensions {
+    lengthCm: float
+    widthCm: float
+    heightCm: float
+    weightGrams: float
+}
+
+struct ProductVariant {
+    id: string
+    sku: string
+    title: string
+    price: common.Money
+    compareAtPrice?: common.Money
+    attributes: map<string, string>
+    imageIds: string[]
+    barcode?: string
+    isDefault: boolean
+}
+
+struct Product {
+    id: string
+    slug: string
+    title: string
+    description: string
+    shortDescription?: string
+    brandId?: string
+    categoryIds: string[]
+    tags: string[]
+    status: ProductStatus
+    visibility: ProductVisibility
+    variants: ProductVariant[]
+    images: common.ImageAsset[]
+    dimensions?: ProductDimensions
+    seoTitle?: string
+    seoDescription?: string
+    publishedAt?: datetime
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct Category {
+    id: string
+    slug: string
+    name: string
+    description?: string
+    parentId?: string
+    image?: common.ImageAsset
+    sortOrder: int
+    isActive: boolean
+    productCount: int
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct Brand {
+    id: string
+    slug: string
+    name: string
+    description?: string
+    logo?: common.ImageAsset
+    websiteUrl?: string
+    isActive: boolean
+    createdAt: datetime
+    updatedAt: datetime
+}
+
+struct ProductListRequest {
+    pagination: common.PaginationRequest
+    query?: string
+    categoryId?: string
+    brandId?: string
+    status?: ProductStatus
+    minPrice?: int
+    maxPrice?: int
+    tags?: string[]
+    inStockOnly?: boolean
+}
+
+struct ProductListResponse {
+    items: Product[]
+    meta: common.PaginationMeta
+}
+
+struct CategoryTreeResponse {
+    roots: Category[]
+}
+
+struct CreateProductRequest {
+    slug: string
+    title: string
+    description: string
+    categoryIds: string[]
+    variants: ProductVariant[]
+    brandId?: string
+    tags?: string[]
+}
+
+struct UpdateProductRequest {
+    id: string
+    title?: string
+    description?: string
+    categoryIds?: string[]
+    status?: ProductStatus
+    visibility?: ProductVisibility
+    tags?: string[]
+}
+
+struct CreateCategoryRequest {
+    slug: string
+    name: string
+    parentId?: string
+    description?: string
+}
+
+struct CreateBrandRequest {
+    slug: string
+    name: string
+    description?: string
+    websiteUrl?: string
+}
+
+struct CategoryListResponse {
+    items: Category[]
+    meta: common.PaginationMeta
+}
+
+struct BrandListResponse {
+    items: Brand[]
+    meta: common.PaginationMeta
+}
+
+struct UpdateCategoryRequest {
+    id: string
+    name?: string
+    description?: string
+    parentId?: string
+    isActive?: boolean
+    sortOrder?: int
+}
+
+struct UpdateBrandRequest {
+    id: string
+    name?: string
+    description?: string
+    websiteUrl?: string
+    isActive?: boolean
+}
+
+service ProductService {
+    @get listProducts(
+        data: ProductListRequest
+    ) => ProductListResponse
+    @get getProduct(
+        data: common.IdRequest
+    ) => Product
+    @get getProductBySlug(
+        data: common.SlugRequest
+    ) => Product
+    @post createProduct(
+        data: CreateProductRequest
+    ) => Product
+    @put updateProduct(
+        data: UpdateProductRequest
+    ) => Product
+    @delete deleteProduct(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+    @get searchProducts(
+        data: ProductListRequest
+    ) => ProductListResponse
+    @post publishProduct(
+        data: common.IdRequest
+    ) => Product
+    @post archiveProduct(
+        data: common.IdRequest
+    ) => Product
+}
+
+service CategoryService {
+    @get listCategories(
+        data: common.PaginationRequest
+    ) => CategoryListResponse
+    @get getCategoryTree(
+        data: common.EmptyResponse
+    ) => CategoryTreeResponse
+    @get getCategory(
+        data: common.IdRequest
+    ) => Category
+    @post createCategory(
+        data: CreateCategoryRequest
+    ) => Category
+    @put updateCategory(
+        data: UpdateCategoryRequest
+    ) => Category
+    @delete deleteCategory(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+}
+
+service BrandService {
+    @get listBrands(
+        data: common.PaginationRequest
+    ) => BrandListResponse
+    @get getBrand(
+        data: common.IdRequest
+    ) => Brand
+    @post createBrand(
+        data: CreateBrandRequest
+    ) => Brand
+    @put updateBrand(
+        data: UpdateBrandRequest
+    ) => Brand
+    @delete deleteBrand(
+        data: common.IdRequest
+    ) => common.EmptyResponse
+}
