@@ -236,7 +236,9 @@ test("playground router serves HTML by default and JSON bootstrap with ?format=j
     expect(html).toContain("tailwindcss.com");
     expect(html).toContain("request-editor");
     expect(html).toContain("monaco-editor");
+    expect(html).toContain('id="method-list"');
     expect(html).toContain("> Send</button>");
+    expect(html).toContain("Copy JSON");
 
     const jsonRes = await fetch(`${baseUrl}/playground?format=json`);
     expect(jsonRes.status).toBe(200);
@@ -258,11 +260,28 @@ test("playground router serves HTML by default and JSON bootstrap with ?format=j
     );
     expect(pingMethod.httpMethod).toBe("GET");
     expect(pingMethod.requestTemplate.service).toBe("demo.DemoService");
-    expect(pingMethod.requestTemplate.params.message).toBe("");
+    expect(pingMethod.requestTemplate.params.message).toBe("hello");
     expect(pingMethod.requestSchema.properties.params).toEqual({
       type: "object",
       properties: { message: { type: "string" } },
       required: ["message"],
+    });
+
+    const analyticsPkg = body.packages.find((pkg: { name: string }) => pkg.name === "analytics");
+    expect(analyticsPkg).toBeDefined();
+    const analyticsService = analyticsPkg.services.find(
+      (service: { name: string }) => service.name === "AnalyticsService"
+    );
+    expect(analyticsService).toBeDefined();
+    const dashboardMethod = analyticsService.methods.find(
+      (method: { method: string }) => method.method === "getDashboard"
+    );
+    expect(dashboardMethod.requestTemplate.params).toEqual({
+      dateRange: {
+        from: "2025-06-01T00:00:00.000Z",
+        to: "2025-06-24T23:59:59.000Z",
+      },
+      storeId: "example-id",
     });
   });
 });

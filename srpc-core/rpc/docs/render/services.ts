@@ -99,6 +99,6 @@ export function renderMethodBlock(
     </dl>
     ${paramsDetail}
     <p class="${cls.meta} mb-3 mt-4">${icon("code")} Copy this request</p>
-    ${codeBlock(exampleRequest(service.qualifiedName, method))}
+    ${codeBlock(exampleRequest(store, contextPackage, service.qualifiedName, method))}
   </section>`;
 }

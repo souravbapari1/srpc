@@ -1,5 +1,6 @@
 import type { ContractDocsStore, MethodDoc } from "../../src/contract-docs.ts";
 import { codeBlock } from "./code-block.ts";
+import { exampleRequest } from "./examples.ts";
 import { icon } from "./ui.ts";
 
 export interface StarterMethod {
@@ -79,24 +80,29 @@ export function renderQuickStart(store: ContractDocsStore): string {
   const starter = findStarterMethod(store);
   const example = starter
     ? {
-        service: starter.qualifiedService,
-        method: starter.method.name,
-        params:
-          starter.method.name === "ping"
-            ? { message: "hello" }
-            : starter.method.params.length === 1 &&
-                starter.method.params[0]!.type.includes("IdRequest")
-              ? { id: "example-id" }
-              : { example: true },
         link: `/docs/${starter.packageName}/${starter.serviceName}#${starter.method.name}`,
         label: `${starter.qualifiedService}.${starter.method.name}`,
+        body: exampleRequest(
+          store,
+          starter.packageName,
+          starter.qualifiedService,
+          starter.method
+        ),
       }
     : {
-        service: "user.UserService",
-        method: "getUser",
-        params: { id: "user-1" },
         link: "/docs",
         label: "user.UserService.getUser",
+        body: JSON.stringify(
+          {
+            srpc: "1.0",
+            service: "user.UserService",
+            method: "getUser",
+            id: "req-1",
+            params: { id: "example-id" },
+          },
+          null,
+          2
+        ),
       };
 
   return `<article class="mb-6 rounded-xl border border-brand/20 bg-brand/5 p-6 shadow-sm">
@@ -122,18 +128,7 @@ export function renderQuickStart(store: ContractDocsStore): string {
     </ol>
     <div class="mt-5">
       <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">Your first request</p>
-      ${codeBlock(
-        JSON.stringify(
-          {
-            srpc: "1.0",
-            service: example.service,
-            method: example.method,
-            params: example.params,
-          },
-          null,
-          2
-        )
-      )}
+      ${codeBlock(example.body)}
     </div>
   </article>`;
 }

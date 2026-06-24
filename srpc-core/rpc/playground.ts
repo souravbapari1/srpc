@@ -4,7 +4,6 @@ import {
   type ContractDocsStore,
   type MethodDoc,
   type ServiceListing,
-  type StructDoc,
 } from "../src/contract-docs.ts";
 import { escapeHtml } from "./docs/escape.ts";
 import { icon } from "./docs/ui.ts";
@@ -13,6 +12,7 @@ import {
   buildPlaygroundTypeDefinitions,
   type JsonSchema,
 } from "./playground-schema.ts";
+import { buildMethodParamsSample } from "./sample-values.ts";
 
 export const SRPC_PLAYGROUND_PATH = "/playground";
 
@@ -108,7 +108,7 @@ function buildPlaygroundBootstrap(
               srpc: "1.0",
               service: service.qualifiedName,
               method: method.name,
-              params: buildMethodParamsTemplate(store, packageName, method),
+              params: buildMethodParamsSample(store, packageName, method),
             },
             requestSchema: buildMethodRequestSchema(
               store,
@@ -128,154 +128,6 @@ function buildPlaygroundBootstrap(
     typeDefinitions,
     packages,
   };
-}
-
-function buildMethodParamsTemplate(
-  store: ContractDocsStore,
-  packageName: string,
-  method: MethodDoc
-): unknown {
-  if (method.params.length === 0) {
-    return {};
-  }
-
-  if (method.params.length === 1) {
-    return buildValueTemplate(store, packageName, method.params[0]!.type, 0);
-  }
-
-  return Object.fromEntries(
-    method.params.map(param => [
-      param.name,
-      buildValueTemplate(store, packageName, param.type, 0),
-    ])
-  );
-}
-
-function buildValueTemplate(
-  store: ContractDocsStore,
-  packageName: string,
-  rawType: string,
-  depth: number
-): unknown {
-  const type = normalizeType(rawType);
-
-  if (!type) {
-    return "";
-  }
-
-  if (depth > 1) {
-    return {};
-  }
-
-  if (type.includes("|")) {
-    return buildValueTemplate(store, packageName, type.split("|")[0]!.trim(), depth);
-  }
-
-  if (type.endsWith("[]") || /^list<.+>$/.test(type)) {
-    return [];
-  }
-
-  if (/^map<.+>$/.test(type)) {
-    return {};
-  }
-
-  if (/^\[.*\]$/.test(type)) {
-    return [];
-  }
-
-  if (type.startsWith("{") && type.endsWith("}")) {
-    return {};
-  }
-
-  switch (type) {
-    case "string":
-    case "bytes":
-    case "date":
-    case "datetime":
-    case "any":
-      return "";
-    case "number":
-    case "int":
-    case "float":
-      return 0;
-    case "boolean":
-      return true;
-    case "null":
-      return null;
-  }
-
-  const enumDoc = resolveEnum(store, packageName, type);
-  if (enumDoc) {
-    return enumDoc.values[0] ?? "";
-  }
-
-  const struct = resolveStruct(store, packageName, type);
-  if (struct) {
-    return Object.fromEntries(
-      struct.fields.map(field => [
-        field.name,
-        buildValueTemplate(store, packageName, field.type, depth + 1),
-      ])
-    );
-  }
-
-  return "";
-}
-
-function normalizeType(type: string): string {
-  return type.trim().replace(/\?$/, "");
-}
-
-function resolveStruct(
-  store: ContractDocsStore,
-  packageName: string,
-  type: string
-): StructDoc | undefined {
-  if (type.includes(".")) {
-    const [pkg, name] = splitQualified(type);
-    if (!pkg || !name) {
-      return undefined;
-    }
-    return store.getStruct(pkg, name);
-  }
-
-  const local = store.getStruct(packageName, type);
-  if (local) {
-    return local;
-  }
-
-  const matches = store.getAllStructs().filter(struct => struct.name === type);
-  return matches.length === 1 ? matches[0] : undefined;
-}
-
-function resolveEnum(
-  store: ContractDocsStore,
-  packageName: string,
-  type: string
-) {
-  if (type.includes(".")) {
-    const [pkg, name] = splitQualified(type);
-    if (!pkg || !name) {
-      return undefined;
-    }
-    return store.getEnum(pkg, name);
-  }
-
-  const local = store.getEnum(packageName, type);
-  if (local) {
-    return local;
-  }
-
-  const matches = store.getAllEnums().filter(enumDoc => enumDoc.name === type);
-  return matches.length === 1 ? matches[0] : undefined;
-}
-
-function splitQualified(type: string): [string | undefined, string | undefined] {
-  const parts = type.split(".");
-  if (parts.length < 2) {
-    return [undefined, undefined];
-  }
-  return [parts[0], parts[parts.length - 1]];
 }
 
 const MONACO_FONT = '"JetBrains Mono", ui-monospace, Menlo, Monaco, Consolas, monospace';
@@ -335,13 +187,28 @@ const MONACO_SUGGEST_STYLES = `
 const PLAYGROUND_STYLES = `
   ${MONACO_EDITOR_STYLES}
   ${MONACO_SUGGEST_STYLES}
-  select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.25rem; padding-right: 2rem; }
+  select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.625rem center;
+    background-repeat: no-repeat;
+    background-size: 1.125rem;
+    padding-right: 2rem;
+  }
+  .pg-method-btn[aria-current="true"] {
+    border-color: #0d9488;
+    background: #f0fdfa;
+    color: #0f766e;
+  }
+  .pg-response-panel[data-state="ok"] .pg-response-accent { background: #10b981; }
+  .pg-response-panel[data-state="error"] .pg-response-accent { background: #f43f5e; }
+  .pg-response-panel[data-state="pending"] .pg-response-accent { background: #a1a1aa; }
+  .pg-response-panel .pg-response-accent { background: #e4e4e7; }
 `;
 
 function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
   const monacoVersion = "0.52.2";
-  const serviceCount = bootstrap.packages.reduce(
-    (n, pkg) => n + pkg.services.length,
+  const methodCount = bootstrap.packages.reduce(
+    (total, pkg) => total + pkg.services.reduce((n, svc) => n + svc.methods.length, 0),
     0
   );
 
@@ -375,93 +242,113 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
 </head>
 <body class="h-full overflow-hidden bg-zinc-100 font-sans text-zinc-900 antialiased">
   <div id="pg-app" class="flex h-full flex-col">
-    <header class="z-10 flex shrink-0 items-center gap-4 border-b border-zinc-200 bg-white px-4 py-3 shadow-sm">
-      <div class="flex items-center gap-2 text-sm font-semibold text-brand">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${icon("flask")}</span>
-        <span>SRPC Playground</span>
-      </div>
-      <div class="hidden min-w-0 flex-1 items-center gap-2 text-sm text-zinc-500 sm:flex">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 font-mono text-xs text-zinc-600">${icon("route")} ${escapeHtml(bootstrap.rpcPath)}</span>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-xs">${icon("box")} ${bootstrap.packages.length} packages</span>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-xs">${icon("plug")} ${serviceCount} services</span>
+    <header class="flex shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4 py-3">
+      <a href="/docs" class="flex items-center gap-2.5">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg border border-brand/25 bg-brand/10 text-brand">${icon("flask")}</span>
+        <span>
+          <span class="block text-sm font-semibold leading-tight text-zinc-900">SRPC Playground</span>
+          <span class="block text-xs text-zinc-500">Test APIs in your browser</span>
+        </span>
+      </a>
+      <div class="ml-4 hidden items-center gap-2 lg:flex">
+        <span class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-xs text-zinc-600">${escapeHtml(bootstrap.rpcPath)}</span>
+        <span class="text-xs text-zinc-400">${bootstrap.packages.length} packages · ${methodCount} methods</span>
       </div>
       <nav class="ml-auto flex items-center gap-1">
-        <a href="/docs" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-brand">${icon("book-open")} Docs</a>
-        <a href="?format=json" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-brand">${icon("download")} JSON</a>
+        <a href="/docs" class="rounded-md px-2.5 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-brand">${icon("book-open")} Docs</a>
+        <a href="?format=json" class="rounded-md px-2.5 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-brand">${icon("download")} Export</a>
       </nav>
     </header>
 
-    <div class="flex min-h-0 flex-1 flex-col md:flex-row">
-      <aside class="flex w-full shrink-0 flex-col gap-4 overflow-y-auto border-b border-zinc-200 bg-white p-4 md:w-72 md:border-b-0 md:border-r">
-        <div class="space-y-3">
-          <div>
-            <label for="pkg" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Package</label>
-            <select id="pkg" class="w-full appearance-none rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"></select>
-          </div>
-          <div>
-            <label for="svc" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Service</label>
-            <select id="svc" class="w-full appearance-none rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"></select>
-          </div>
-          <div>
-            <label for="method" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Method</label>
-            <select id="method" class="w-full appearance-none rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"></select>
+    <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <aside class="flex w-full shrink-0 flex-col border-b border-zinc-200 bg-white lg:w-72 lg:border-b-0 lg:border-r">
+        <div class="border-b border-zinc-100 px-4 py-3">
+          <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">API explorer</p>
+          <div class="mt-3 space-y-2">
+            <div>
+              <label for="pkg" class="mb-1 block text-[11px] font-medium text-zinc-500">Package</label>
+              <select id="pkg" class="w-full appearance-none rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:outline-2 focus:outline-brand/25"></select>
+            </div>
+            <div>
+              <label for="svc" class="mb-1 block text-[11px] font-medium text-zinc-500">Service</label>
+              <select id="svc" class="w-full appearance-none rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:outline-2 focus:outline-brand/25"></select>
+            </div>
           </div>
         </div>
 
-        <dl class="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm">
-          <div>
-            <dt class="text-xs font-semibold uppercase tracking-wide text-zinc-400">Qualified service</dt>
-            <dd id="qualified-service" class="mt-1 break-words font-mono text-xs text-zinc-700">—</dd>
-          </div>
-          <div>
-            <dt class="text-xs font-semibold uppercase tracking-wide text-zinc-400">HTTP</dt>
-            <dd id="http-method" class="mt-1">—</dd>
-          </div>
-          <div>
-            <dt class="text-xs font-semibold uppercase tracking-wide text-zinc-400">Params</dt>
-            <dd class="mt-1"><code id="params-type" class="font-mono text-xs text-zinc-700">—</code></dd>
-          </div>
-          <div>
-            <dt class="text-xs font-semibold uppercase tracking-wide text-zinc-400">Returns</dt>
-            <dd class="mt-1"><code id="return-type" class="font-mono text-xs text-zinc-700">—</code></dd>
-          </div>
-        </dl>
+        <div class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+          <p class="px-1 text-[11px] font-medium text-zinc-500">Methods</p>
+          <div id="method-list" class="mt-2 space-y-1"></div>
+        </div>
+
+        <div class="border-t border-zinc-100 p-4">
+          <dl class="space-y-2 text-xs">
+            <div>
+              <dt class="font-medium text-zinc-400">Returns</dt>
+              <dd class="mt-0.5"><code id="return-type" class="break-all font-mono text-zinc-700">—</code></dd>
+            </div>
+            <div>
+              <dt class="font-medium text-zinc-400">Params</dt>
+              <dd class="mt-0.5"><code id="params-type" class="break-all font-mono text-zinc-700">—</code></dd>
+            </div>
+          </dl>
+          <a id="docs-link" href="/docs" class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-brand hover:text-brand-dark">${icon("arrow-up-right-from-square")} Open in docs</a>
+        </div>
       </aside>
 
-      <section class="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div class="flex shrink-0 flex-wrap items-center gap-2 border-b border-zinc-200 bg-white px-4 py-3">
-          <button type="button" id="send" class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand/30">${icon("paper-plane")} Send</button>
-          <button type="button" id="reset" class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-brand hover:text-brand focus:outline-none focus:ring-2 focus:ring-brand/20">${icon("rotate-left")} Reset</button>
-          <div class="ml-auto flex items-center gap-3 text-sm text-zinc-500">
-            <span id="request-status">Ready</span>
-            <span id="request-time"></span>
-            <kbd class="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-xs text-zinc-400">⌘↵</kbd>
+      <main class="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div class="border-b border-zinc-200 bg-white px-4 py-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="http-method">—</span>
+            <div class="min-w-0 flex-1">
+              <p id="method-title" class="truncate text-base font-semibold text-zinc-900">Select a method</p>
+              <p class="truncate font-mono text-xs text-zinc-500">
+                <span id="qualified-service">—</span><span class="text-zinc-300"> · </span><span id="method-name-label">—</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" id="send" class="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark focus:outline-2 focus:outline-brand/40">${icon("paper-plane")} Send</button>
+            <button type="button" id="reset" class="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">${icon("rotate-left")} Reset</button>
+            <button type="button" id="copy-request" class="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">${icon("copy")} Copy JSON</button>
+            <div class="ml-auto flex items-center gap-2 text-sm">
+              <span id="request-status" class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-500">Ready</span>
+              <span id="request-time" class="font-mono text-xs text-zinc-400"></span>
+              <kbd class="rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">⌘↵</kbd>
+            </div>
           </div>
         </div>
 
         <div class="grid min-h-0 flex-1 grid-rows-2 xl:grid-cols-2 xl:grid-rows-none">
-          <div class="flex min-h-0 flex-col border-b border-zinc-200 bg-white xl:border-b-0 xl:border-r">
-            <div class="flex shrink-0 items-center justify-between border-b border-zinc-100 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              <span class="inline-flex items-center gap-1.5">${icon("code")} Request</span>
-              <span class="font-normal normal-case text-zinc-400">JSON envelope</span>
+          <section class="flex min-h-0 flex-col border-b border-zinc-200 bg-white xl:border-b-0 xl:border-r">
+            <div class="flex shrink-0 items-center justify-between border-b border-zinc-100 px-4 py-2">
+              <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">${icon("code")} Request</span>
+              <span class="text-xs text-zinc-400">JSON envelope</span>
             </div>
-            <div class="relative min-h-0 flex-1">
+            <div class="relative min-h-0 flex-1 bg-[#fafafa]">
               <div id="request-editor" class="pg-monaco absolute inset-0"></div>
             </div>
-          </div>
-          <div class="flex min-h-0 flex-col bg-white">
-            <div class="flex shrink-0 items-center justify-between border-b border-zinc-100 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              <span class="inline-flex items-center gap-1.5">${icon("terminal")} Response</span>
-              <span id="response-status" class="font-normal normal-case text-zinc-400">—</span>
+          </section>
+
+          <section class="pg-response-panel flex min-h-0 flex-col bg-white" data-state="idle">
+            <div class="flex shrink-0 items-center border-b border-zinc-100">
+              <span class="pg-response-accent w-1 self-stretch"></span>
+              <div class="flex flex-1 items-center justify-between px-4 py-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">${icon("terminal")} Response</span>
+                <span id="response-status" class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-xs text-zinc-500">—</span>
+              </div>
             </div>
-            <div class="relative min-h-0 flex-1">
+            <div class="relative min-h-0 flex-1 bg-[#fafafa]">
               <div id="response-editor" class="pg-monaco absolute inset-0"></div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
+      </main>
     </div>
   </div>
+
+  <select id="method" class="sr-only" aria-hidden="true" tabindex="-1"></select>
 
   <script id="playground-bootstrap" type="application/json">${serializeForScript(bootstrap)}</script>
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@${monacoVersion}/min/vs/loader.js"></script>
@@ -475,26 +362,39 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
       const packageSelect = document.getElementById("pkg");
       const serviceSelect = document.getElementById("svc");
       const methodSelect = document.getElementById("method");
+      const methodList = document.getElementById("method-list");
       const requestStatus = document.getElementById("request-status");
       const requestTime = document.getElementById("request-time");
       const responseStatus = document.getElementById("response-status");
+      const responsePanel = document.querySelector(".pg-response-panel");
       const qualifiedService = document.getElementById("qualified-service");
+      const methodTitle = document.getElementById("method-title");
+      const methodNameLabel = document.getElementById("method-name-label");
       const httpMethod = document.getElementById("http-method");
       const paramsType = document.getElementById("params-type");
       const returnType = document.getElementById("return-type");
+      const docsLink = document.getElementById("docs-link");
       const sendButton = document.getElementById("send");
       const resetButton = document.getElementById("reset");
+      const copyButton = document.getElementById("copy-request");
 
       let requestEditor = null;
       let responseEditor = null;
       let monacoApi = null;
 
       const STATUS = {
-        ok: "font-medium text-emerald-600",
-        error: "font-medium text-rose-600",
-        muted: "text-zinc-500",
-        kbd: "font-normal text-zinc-400",
+        ok: "rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700",
+        error: "rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700",
+        muted: "rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-500",
+        pending: "rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700",
+        kbd: "rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-xs text-zinc-500",
       };
+
+      function setResponseState(state) {
+        if (responsePanel) {
+          responsePanel.dataset.state = state;
+        }
+      }
 
       function httpMethodBadge(verb) {
         const method = (verb || "POST").toUpperCase();
@@ -551,6 +451,46 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
         (service?.methods || []).forEach(method => {
           methodSelect.appendChild(option(method.method, method.method));
         });
+        renderMethodList();
+      }
+
+      function renderMethodList() {
+        if (!methodList) return;
+        methodList.innerHTML = "";
+        const service = getServiceMeta(packageSelect.value, serviceSelect.value);
+        const methods = service?.methods || [];
+
+        if (methods.length === 0) {
+          methodList.innerHTML = '<p class="px-2 py-3 text-xs text-zinc-400">No methods in this service.</p>';
+          return;
+        }
+
+        methods.forEach(method => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "pg-method-btn flex w-full items-center gap-2 rounded-md border border-transparent px-2 py-2 text-left text-sm transition hover:border-zinc-200 hover:bg-zinc-50";
+          btn.dataset.method = method.method;
+          btn.innerHTML =
+            '<span class="shrink-0 text-[10px] font-bold uppercase text-zinc-400">' +
+            (method.httpMethod || "POST").toUpperCase() +
+            '</span><span class="truncate font-medium text-zinc-800">' +
+            method.method +
+            "</span>";
+          btn.setAttribute("aria-current", method.method === methodSelect.value ? "true" : "false");
+          btn.addEventListener("click", function () {
+            methodSelect.value = method.method;
+            setEditorFromMethod();
+            updateQuery();
+          });
+          methodList.appendChild(btn);
+        });
+      }
+
+      function highlightSelectedMethod() {
+        if (!methodList) return;
+        methodList.querySelectorAll(".pg-method-btn").forEach(btn => {
+          btn.setAttribute("aria-current", btn.dataset.method === methodSelect.value ? "true" : "false");
+        });
       }
 
       let requestModelUri = null;
@@ -594,6 +534,8 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
         applyRequestSchema(method);
         setRequestValue(JSON.stringify(method.requestTemplate, null, 2));
         qualifiedService.textContent = method.qualifiedService;
+        methodTitle.textContent = method.method;
+        methodNameLabel.textContent = method.method;
         httpMethod.innerHTML = httpMethodBadge(method.httpMethod);
         paramsType.textContent = method.params.length === 0
           ? "none"
@@ -601,12 +543,30 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
             ? method.params[0].type
             : method.params.map(param => param.name + ": " + param.type).join(", ");
         returnType.textContent = method.returnType;
+        docsLink.href = "/docs/" + encodeURIComponent(method.package) + "/" + encodeURIComponent(method.service) + "#" + encodeURIComponent(method.method);
+        highlightSelectedMethod();
         requestStatus.textContent = "Ready";
         requestStatus.className = STATUS.muted;
         requestTime.textContent = "";
         responseStatus.textContent = "—";
         responseStatus.className = STATUS.kbd;
-        setResponseValue("Send a request to see the response.");
+        setResponseState("idle");
+        setResponseValue("// Send a request to see the response here.\\n// Press Send or use ⌘↵");
+      }
+
+      async function copyRequestJson() {
+        if (!requestEditor) return;
+        const text = requestEditor.getValue();
+        try {
+          await navigator.clipboard.writeText(text);
+          const original = copyButton.innerHTML;
+          copyButton.innerHTML = '${icon("check")} Copied';
+          window.setTimeout(function () {
+            copyButton.innerHTML = original;
+          }, 1500);
+        } catch {
+          copyButton.innerHTML = '${icon("triangle-exclamation")} Copy failed';
+        }
       }
 
       function syncFromQuery() {
@@ -651,17 +611,19 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
           requestStatus.className = STATUS.error;
           responseStatus.textContent = "Parse error";
           responseStatus.className = STATUS.error;
+          setResponseState("error");
           setResponseValue(String(error));
           return;
         }
 
         const started = performance.now();
-        requestStatus.textContent = "Sending...";
-        requestStatus.className = STATUS.muted;
+        requestStatus.textContent = "Sending…";
+        requestStatus.className = STATUS.pending;
         requestTime.textContent = "";
-        responseStatus.textContent = "Waiting…";
-        responseStatus.className = STATUS.kbd;
-        setResponseValue("Waiting for response...");
+        responseStatus.textContent = "…";
+        responseStatus.className = STATUS.pending;
+        setResponseState("pending");
+        setResponseValue("// Waiting for response...");
 
         try {
           const verb = (method.httpMethod || "POST").toUpperCase();
@@ -694,11 +656,12 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
           }
 
           const elapsed = Math.round(performance.now() - started);
-          requestStatus.textContent = response.ok ? "Success" : "Request failed";
+          requestStatus.textContent = response.ok ? "Success" : "Failed";
           requestStatus.className = response.ok ? STATUS.ok : STATUS.error;
-          requestTime.textContent = response.status + " in " + elapsed + "ms";
+          requestTime.textContent = response.status + " · " + elapsed + "ms";
           responseStatus.textContent = String(response.status);
           responseStatus.className = response.ok ? STATUS.ok : STATUS.error;
+          setResponseState(response.ok ? "ok" : "error");
           setResponseValue(typeof parsed === "string"
             ? parsed
             : JSON.stringify(parsed, null, 2));
@@ -709,6 +672,7 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
           requestTime.textContent = elapsed + "ms";
           responseStatus.textContent = "Error";
           responseStatus.className = STATUS.error;
+          setResponseState("error");
           setResponseValue(String(error));
         }
       }
@@ -756,7 +720,7 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
         });
 
         responseEditor = monaco.editor.create(document.getElementById("response-editor"), {
-          model: monaco.editor.createModel("Send a request to see the response.", "json", monaco.Uri.parse(RESPONSE_MODEL_URI)),
+          model: monaco.editor.createModel("// Send a request to see the response here.\\n// Press Send or use ⌘↵", "json", monaco.Uri.parse(RESPONSE_MODEL_URI)),
           theme: "vs",
           language: "json",
           readOnly: true,
@@ -801,6 +765,7 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
 
         resetButton.addEventListener("click", setEditorFromMethod);
         sendButton.addEventListener("click", sendRequest);
+        copyButton.addEventListener("click", copyRequestJson);
       }
 
       require.config({ paths: { vs: monacoBase + "/vs" } });
