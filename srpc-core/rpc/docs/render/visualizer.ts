@@ -27,29 +27,29 @@ export function renderVisualizer(store: ContractDocsStore): string {
     <article class="${cls.panel}">
       ${panelHeading("sliders", "View options")}
       <div class="mb-4 flex flex-wrap items-center gap-4">
-        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-zinc-600">
-          <input type="checkbox" id="viz-show-services" checked class="rounded border-zinc-300 text-brand focus:ring-brand/30" />
+        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-400">
+          <input type="checkbox" id="viz-show-services" checked class="bg-white/5 text-brand focus:ring-brand/30" />
           Show services
         </label>
-        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-zinc-600">
-          <input type="checkbox" id="viz-physics" checked class="rounded border-zinc-300 text-brand focus:ring-brand/30" />
+        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-400">
+          <input type="checkbox" id="viz-physics" checked class="bg-white/5 text-brand focus:ring-brand/30" />
           Physics layout
         </label>
-        <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:border-brand hover:text-brand" id="viz-fit">${icon("expand")} Fit view</button>
-        <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:border-brand hover:text-brand" id="viz-fullscreen">${icon("maximize")} Full screen</button>
+        <button type="button" class="${cls.btnSecondary}" id="viz-fit">${icon("expand")} Fit view</button>
+        <button type="button" class="${cls.btnSecondary}" id="viz-fullscreen">${icon("maximize")} Full screen</button>
       </div>
       <p class="${cls.meta} mb-2" id="viz-selection">Click a node to see details and open its docs page.</p>
       <div class="viz-stage" id="viz-stage">
         <div id="contract-graph" class="contract-graph" role="img" aria-label="Contract dependency graph"></div>
-        <button type="button" class="viz-fullscreen-exit inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-800 shadow-sm transition hover:text-brand" id="viz-exit-fullscreen" hidden>
+        <button type="button" class="viz-fullscreen-exit ${cls.btnSecondary} font-semibold" id="viz-exit-fullscreen" hidden>
           ${icon("compress")} Exit full screen
         </button>
       </div>
-      <div class="mt-4 flex flex-wrap gap-4 text-sm text-zinc-500">
-        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 rounded-sm border-2 border-brand bg-white"></i> Package</span>
-        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 rounded-sm border border-zinc-300 bg-zinc-50"></i> Service</span>
-        <span class="inline-flex items-center gap-2"><i class="inline-block w-5 border-t-2 border-zinc-400"></i> Type dependency</span>
-        <span class="inline-flex items-center gap-2"><i class="inline-block w-5 border-t-2 border-dashed border-zinc-300"></i> Contains service</span>
+      <div class="mt-4 flex flex-wrap gap-4 text-sm text-slate-500">
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 bg-brand"></i> Package</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 bg-docs-sidebar"></i> Service</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-0.5 w-5 bg-slate-500"></i> Type dependency</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-0.5 w-5 bg-slate-600 opacity-60"></i> Contains service</span>
       </div>
     </article>
     <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
@@ -117,8 +117,8 @@ export function renderVisualizer(store: ContractDocsStore): string {
             },
             groups: {
               package: {
-                borderWidth: 2,
-                borderWidthSelected: 2,
+                borderWidth: 0,
+                borderWidthSelected: 0,
                 font: {
                   size: 14,
                   face: "ui-monospace, SFMono-Regular, Menlo, monospace",
@@ -133,8 +133,8 @@ export function renderVisualizer(store: ContractDocsStore): string {
                 },
               },
               service: {
-                borderWidth: 1,
-                borderWidthSelected: 2,
+                borderWidth: 0,
+                borderWidthSelected: 0,
                 font: {
                   multi: true,
                   size: 11,

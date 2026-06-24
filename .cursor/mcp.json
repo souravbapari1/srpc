@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "srpc": {
+      "command": "bun",
+      "args": [
+        "${workspaceFolder}/srpc-mcp/index.ts"
+      ],
+      "env": {
+        "SRPC_CONTRACT_DIR": "${workspaceFolder}/example/contract"
+      }
+    }
+  }
+}

@@ -140,7 +140,7 @@ export function linkifyContractType(
   }
 
   if (trimmed.startsWith("{")) {
-    return `<span class="font-medium text-blue-700">${escapeHtml(trimmed)}</span>`;
+    return `<span class="font-medium text-violet-400">${escapeHtml(trimmed)}</span>`;
   }
 
   const arrayMatch = trimmed.match(/^(.+)\[\]$/);
@@ -170,5 +170,5 @@ export function linkifyContractType(
     return renderTypeLink(ref, trimmed);
   }
 
-  return `<span class="font-medium text-blue-700">${escapeHtml(trimmed)}</span>`;
+  return `<span class="font-medium text-violet-400">${escapeHtml(trimmed)}</span>`;
 }

@@ -2,18 +2,39 @@ import type { MethodDoc } from "../../src/contract-docs.ts";
 import { escapeHtml } from "./escape.ts";
 
 export const cls = {
-  panel: "mb-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm",
-  h1: "flex items-center gap-2.5 text-3xl font-bold tracking-tight text-zinc-900",
-  h1Icon: "text-brand",
-  lead: "mt-3 max-w-3xl text-base leading-relaxed text-zinc-600",
-  meta: "text-sm text-zinc-500",
-  empty: "text-sm italic text-zinc-400",
+  panel: "mb-6 bg-docs-panel p-6",
+  panelAccent: "mb-6 bg-blue-500/10 p-6",
+  panelMuted: "mb-6 bg-docs-sidebar p-6",
+  card: "bg-white/5 p-4",
+  h1: "flex items-center gap-2.5 text-3xl font-bold tracking-tight text-slate-50",
+  h1Icon: "text-blue-400",
+  lead: "mt-3 max-w-3xl text-base leading-relaxed text-slate-400",
+  meta: "text-sm text-slate-500",
+  empty: "text-sm italic text-slate-600",
   stats: "mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5",
   sectionTitle:
-    "mb-4 flex items-center gap-2 text-lg font-semibold text-zinc-900",
-  typeLink: "font-medium text-brand hover:text-brand-dark hover:underline",
+    "mb-4 flex items-center gap-2 text-lg font-semibold text-slate-100",
+  typeLink: "font-medium text-blue-400 hover:text-blue-300 hover:underline",
+  link: "font-medium text-blue-400 hover:text-blue-300",
   footer:
-    "mt-10 flex items-center gap-2 border-t border-zinc-200 pt-6 text-sm text-zinc-400",
+    "mt-10 flex items-center gap-2 pt-6 text-sm text-slate-500",
+  code: "bg-white/5 px-1.5 py-0.5 font-mono text-sm text-slate-200",
+  codeXs: "bg-white/5 px-1 py-0.5 font-mono text-xs text-slate-200",
+  divider: "py-4",
+  sectionGap: "mb-8 pb-8 last:mb-0 last:pb-0",
+  tableHead:
+    "text-xs font-semibold uppercase tracking-wide text-slate-500",
+  tableRow: "py-3",
+  label: "text-xs font-semibold uppercase tracking-wide text-slate-500",
+  body: "text-sm text-slate-300",
+  heading: "text-lg font-semibold text-slate-100",
+  subheading: "text-base font-semibold text-slate-100",
+  btn:
+    "inline-flex shrink-0 items-center justify-center gap-2 bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark",
+  btnSecondary:
+    "inline-flex items-center gap-1.5 bg-white/5 px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-blue-400",
+  listLink:
+    "flex items-center gap-2 px-2 py-1.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-blue-400",
 };
 
 export function icon(name: string, className = ""): string {
@@ -21,22 +42,23 @@ export function icon(name: string, className = ""): string {
 }
 
 const HTTP_BADGE_COLORS: Record<string, string> = {
-  GET: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-  POST: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  PUT: "bg-amber-50 text-amber-700 ring-amber-600/20",
-  PATCH: "bg-violet-50 text-violet-700 ring-violet-600/20",
-  DELETE: "bg-rose-50 text-rose-700 ring-rose-600/20",
+  GET: "bg-emerald-500/15 text-emerald-400",
+  POST: "bg-blue-500/15 text-blue-400",
+  PUT: "bg-amber-500/15 text-amber-400",
+  PATCH: "bg-violet-500/15 text-violet-400",
+  DELETE: "bg-rose-500/15 text-rose-400",
 };
 
 export function httpBadge(method: string): string {
   const verb = method.toUpperCase();
-  const color = HTTP_BADGE_COLORS[verb] ?? "bg-brand/10 text-brand ring-brand/20";
-  return `<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${color}">${escapeHtml(verb)}</span>`;
+  const color = HTTP_BADGE_COLORS[verb] ?? "bg-blue-500/15 text-blue-400";
+  return `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold ${color}">${escapeHtml(verb)}</span>`;
 }
 
 export function methodChip(method: MethodDoc): string {
   const verb = method.httpMethod.toUpperCase();
-  return `<span class="inline-flex items-center gap-1.5 rounded-md bg-zinc-50 px-2 py-1 text-sm text-zinc-700 ring-1 ring-inset ring-zinc-200"><span class="text-[0.6875rem] font-bold text-brand">${escapeHtml(verb)}</span>${escapeHtml(method.name)}</span>`;
+  const verbColor = HTTP_BADGE_COLORS[verb]?.split(" ").pop() ?? "text-blue-400";
+  return `<span class="inline-flex items-center gap-1.5 bg-white/5 px-2 py-1 text-sm text-slate-300"><span class="text-[0.6875rem] font-bold ${verbColor}">${escapeHtml(verb)}</span>${escapeHtml(method.name)}</span>`;
 }
 
 export function statCard(
@@ -46,27 +68,35 @@ export function statCard(
   _tone: string,
   labelHtml?: string
 ): string {
-  return `<div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+  return `<div class="bg-docs-sidebar p-4">
     <div class="flex items-start justify-between gap-2">
-      <span class="text-xs font-semibold uppercase tracking-wide text-zinc-400">${labelHtml ?? escapeHtml(label)}</span>
-      <span class="text-zinc-400">${icon(iconName)}</span>
+      <span class="${cls.label}">${labelHtml ?? escapeHtml(label)}</span>
+      <span class="text-slate-600">${icon(iconName)}</span>
     </div>
-    <p class="mt-2 text-2xl font-bold tracking-tight text-zinc-900">${value}</p>
+    <p class="mt-2 text-2xl font-bold tracking-tight text-slate-50">${value}</p>
   </div>`;
 }
 
 export function panelHeading(iconName: string, text: string): string {
-  return `<h2 class="${cls.sectionTitle}">${icon(iconName, "text-brand")} ${text}</h2>`;
+  return `<h2 class="${cls.sectionTitle}">${icon(iconName, "text-blue-400")} ${text}</h2>`;
 }
 
 export function navLink(active: boolean): string {
   return active
-    ? "flex items-center gap-2 rounded-lg bg-brand/10 px-2.5 py-1.5 text-sm font-medium text-brand"
-    : "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-brand";
+    ? "flex items-center gap-2 bg-blue-500/15 px-2.5 py-1.5 text-sm font-medium text-blue-400"
+    : "flex items-center gap-2 px-2.5 py-1.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-blue-400";
 }
 
 export function pkgNavLink(active: boolean): string {
   return active
-    ? "flex items-center gap-2 rounded-lg bg-brand/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-brand"
-    : "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-zinc-800 transition hover:bg-zinc-100 hover:text-brand";
+    ? "flex items-center gap-2 bg-blue-500/15 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-blue-400"
+    : "flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-300 transition hover:bg-white/5 hover:text-blue-400";
+}
+
+export function statusLive(): string {
+  return `<span class="inline-flex items-center gap-1 bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-400">${icon("circle-check")} Live on this server</span>`;
+}
+
+export function statusPending(): string {
+  return `<span class="inline-flex items-center gap-1 bg-white/5 px-2 py-0.5 text-xs font-semibold text-slate-500">${icon("circle-xmark")} Not wired up yet</span>`;
 }

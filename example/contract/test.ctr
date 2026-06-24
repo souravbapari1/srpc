@@ -1,0 +1,15 @@
+package test
+
+struct TestRequest {
+    name: string
+}
+
+struct TestResponse {
+    message: string
+}
+
+service TestService {
+    @get test(
+        data: TestRequest
+    ) => TestResponse
+}

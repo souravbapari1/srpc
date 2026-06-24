@@ -172,7 +172,7 @@ const MONACO_SUGGEST_STYLES = `
   }
   .monaco-editor .suggest-widget .monaco-list-row .label-name,
   .monaco-editor .suggest-widget .monaco-list-row .monaco-highlighted-label {
-    color: #3b3b3b;
+    color: #e2e8f0;
     opacity: 1;
     font-family: ${MONACO_FONT};
     font-size: 13px;
@@ -180,29 +180,105 @@ const MONACO_SUGGEST_STYLES = `
   }
   .monaco-editor .suggest-widget .monaco-list-row.focused .label-name,
   .monaco-editor .suggest-widget .monaco-list-row.focused .monaco-highlighted-label {
-    color: #ffffff;
+    color: #f8fafc;
   }
 `;
 
 const PLAYGROUND_STYLES = `
   ${MONACO_EDITOR_STYLES}
   ${MONACO_SUGGEST_STYLES}
+  :root {
+    --pg-bg: #0d1117;
+    --pg-sidebar: #161b22;
+    --pg-panel: #1c2128;
+    --pg-primary: #3b82f6;
+    --pg-cyan: #06b6d4;
+    --pg-accent: #8b5cf6;
+    --pg-success: #22c55e;
+    --pg-warning: #f59e0b;
+    --pg-danger: #ef4444;
+    --pg-text: #f8fafc;
+    --pg-text-muted: #94a3b8;
+    --pg-border: #30363d;
+    --pg-editor: #0d1117;
+  }
+  body, body * { border-radius: 0 !important; }
+  body { background: var(--pg-bg); color: var(--pg-text); }
+  input, button, select, table, th, td { border: none; }
   select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-color: rgba(255, 255, 255, 0.04);
+    color: var(--pg-text);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.625rem center;
     background-repeat: no-repeat;
     background-size: 1.125rem;
     padding-right: 2rem;
   }
-  .pg-method-btn[aria-current="true"] {
-    border-color: #0d9488;
-    background: #f0fdfa;
-    color: #0f766e;
+  select:focus { outline: 2px solid rgba(59, 130, 246, 0.35); }
+  .pg-logo {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #8b5cf6 100%);
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.25);
   }
-  .pg-response-panel[data-state="ok"] .pg-response-accent { background: #10b981; }
-  .pg-response-panel[data-state="error"] .pg-response-accent { background: #f43f5e; }
-  .pg-response-panel[data-state="pending"] .pg-response-accent { background: #a1a1aa; }
-  .pg-response-panel .pg-response-accent { background: #e4e4e7; }
+  .pg-surface { background: var(--pg-panel); }
+  .pg-sidebar { background: var(--pg-sidebar); }
+  .pg-muted { color: var(--pg-text-muted); }
+  .pg-text { color: var(--pg-text); }
+  .pg-input {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--pg-text);
+  }
+  .pg-input:focus { outline: 2px solid rgba(59, 130, 246, 0.3); }
+  .pg-input::placeholder { color: #64748b; }
+  .pg-btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+  }
+  .pg-btn-primary:hover { filter: brightness(1.08); }
+  .pg-btn-ghost {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--pg-text);
+  }
+  .pg-btn-ghost:hover { background: rgba(255, 255, 255, 0.08); }
+  .pg-chip {
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+  }
+  .pg-method-btn { color: var(--pg-text); }
+  .pg-method-btn:hover { background: rgba(255, 255, 255, 0.04); }
+  .pg-method-btn[aria-current="true"] {
+    background: rgba(59, 130, 246, 0.14);
+    color: #dbeafe;
+  }
+  .pg-tab { color: var(--pg-text-muted); }
+  .pg-tab:hover { color: var(--pg-text); background: rgba(255, 255, 255, 0.04); }
+  .pg-tab[aria-selected="true"] {
+    color: #bfdbfe;
+    background: rgba(59, 130, 246, 0.14);
+  }
+  .pg-tab-count {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--pg-text-muted);
+  }
+  .pg-editor-bg { background: var(--pg-editor); }
+  .pg-link { color: #60a5fa; }
+  .pg-link:hover { color: #93c5fd; }
+  .pg-http-get { background: rgba(34, 197, 94, 0.16); color: #22c55e; }
+  .pg-http-post { background: rgba(59, 130, 246, 0.16); color: #3b82f6; }
+  .pg-http-put { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
+  .pg-http-patch { background: rgba(168, 85, 247, 0.16); color: #a855f7; }
+  .pg-http-delete { background: rgba(239, 68, 68, 0.16); color: #ef4444; }
+  .pg-http-default { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
+  .pg-status-ok { background: rgba(34, 197, 94, 0.14); color: #4ade80; }
+  .pg-status-error { background: rgba(239, 68, 68, 0.14); color: #f87171; }
+  .pg-status-pending { background: rgba(245, 158, 11, 0.14); color: #fbbf24; }
+  .pg-status-muted { background: rgba(255, 255, 255, 0.04); color: var(--pg-text-muted); }
+  .pg-response-panel[data-state="ok"] .pg-response-accent { background: var(--pg-success); }
+  .pg-response-panel[data-state="error"] .pg-response-accent { background: var(--pg-danger); }
+  .pg-response-panel[data-state="pending"] .pg-response-accent { background: var(--pg-warning); }
+  .pg-response-panel .pg-response-accent { background: rgba(255, 255, 255, 0.08); }
+  .pg-nav-btn { color: var(--pg-text-muted); }
+  .pg-nav-btn:hover { color: #93c5fd; background: rgba(255, 255, 255, 0.04); }
+  .pg-code { background: rgba(255, 255, 255, 0.06); color: #cbd5e1; }
 `;
 
 function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
@@ -232,7 +308,17 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
             mono: ["JetBrains Mono", "ui-monospace", "monospace"],
           },
           colors: {
-            brand: { DEFAULT: "#0d9488", dark: "#0f766e", light: "#ccfbf1" },
+            pg: {
+              bg: "#0D1117",
+              sidebar: "#161B22",
+              panel: "#1C2128",
+              primary: "#3B82F6",
+              cyan: "#06B6D4",
+              accent: "#8B5CF6",
+              border: "#30363D",
+              muted: "#94A3B8",
+              text: "#F8FAFC",
+            },
           },
         },
       },
@@ -240,106 +326,114 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
   </script>
   <style>${PLAYGROUND_STYLES}</style>
 </head>
-<body class="h-full overflow-hidden bg-zinc-100 font-sans text-zinc-900 antialiased">
+<body class="h-full overflow-hidden font-sans antialiased">
   <div id="pg-app" class="flex h-full flex-col">
-    <header class="flex shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4 py-3">
+    <header class="flex shrink-0 items-center gap-3 px-4 py-3" style="background: var(--pg-sidebar)">
       <a href="/docs" class="flex items-center gap-2.5">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg border border-brand/25 bg-brand/10 text-brand">${icon("flask")}</span>
+        <span class="pg-logo flex h-9 w-9 items-center justify-center text-white">${icon("flask")}</span>
         <span>
-          <span class="block text-sm font-semibold leading-tight text-zinc-900">SRPC Playground</span>
-          <span class="block text-xs text-zinc-500">Test APIs in your browser</span>
+          <span class="block text-sm font-semibold leading-tight pg-text">SRPC Playground</span>
+          <span class="block text-xs pg-muted">API client for your contracts</span>
         </span>
       </a>
       <div class="ml-4 hidden items-center gap-2 lg:flex">
-        <span class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-xs text-zinc-600">${escapeHtml(bootstrap.rpcPath)}</span>
-        <span class="text-xs text-zinc-400">${bootstrap.packages.length} packages · ${methodCount} methods</span>
+        <span class="pg-chip px-2 py-1 font-mono text-xs">${escapeHtml(bootstrap.rpcPath)}</span>
+        <span class="text-xs pg-muted">${bootstrap.packages.length} packages · ${methodCount} methods</span>
       </div>
       <nav class="ml-auto flex items-center gap-1">
-        <a href="/docs" class="rounded-md px-2.5 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-brand">${icon("book-open")} Docs</a>
-        <a href="?format=json" class="rounded-md px-2.5 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-brand">${icon("download")} Export</a>
+        <a href="/docs" class="pg-nav-btn px-2.5 py-1.5 text-sm transition">${icon("book-open")} Docs</a>
+        <a href="?format=json" class="pg-nav-btn px-2.5 py-1.5 text-sm transition">${icon("download")} Export</a>
       </nav>
     </header>
 
     <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
-      <aside class="flex w-full shrink-0 flex-col border-b border-zinc-200 bg-white lg:w-72 lg:border-b-0 lg:border-r">
-        <div class="border-b border-zinc-100 px-4 py-3">
-          <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">API explorer</p>
+      <aside class="pg-sidebar flex w-full shrink-0 flex-col lg:w-72">
+        <div class="px-4 py-3">
+          <p class="text-[11px] font-semibold uppercase tracking-wider pg-muted">Explorer</p>
           <div class="mt-3 space-y-2">
             <div>
-              <label for="pkg" class="mb-1 block text-[11px] font-medium text-zinc-500">Package</label>
-              <select id="pkg" class="w-full appearance-none rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:outline-2 focus:outline-brand/25"></select>
+              <label for="pkg" class="mb-1 block text-[11px] font-medium pg-muted">Package</label>
+              <select id="pkg" class="w-full appearance-none px-3 py-2 text-sm outline-none transition"></select>
             </div>
             <div>
-              <label for="svc" class="mb-1 block text-[11px] font-medium text-zinc-500">Service</label>
-              <select id="svc" class="w-full appearance-none rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-brand focus:outline-2 focus:outline-brand/25"></select>
+              <label for="svc" class="mb-1 block text-[11px] font-medium pg-muted">Service</label>
+              <select id="svc" class="w-full appearance-none px-3 py-2 text-sm outline-none transition"></select>
             </div>
           </div>
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-          <p class="px-1 text-[11px] font-medium text-zinc-500">Methods</p>
+          <p class="px-1 text-[11px] font-medium pg-muted">Methods</p>
           <div id="method-list" class="mt-2 space-y-1"></div>
         </div>
 
-        <div class="border-t border-zinc-100 p-4">
+        <div class="mt-auto p-4 pt-3" style="background: rgba(0,0,0,0.12)">
           <dl class="space-y-2 text-xs">
             <div>
-              <dt class="font-medium text-zinc-400">Returns</dt>
-              <dd class="mt-0.5"><code id="return-type" class="break-all font-mono text-zinc-700">—</code></dd>
+              <dt class="font-medium pg-muted">Returns</dt>
+              <dd class="mt-0.5"><code id="return-type" class="break-all font-mono text-slate-300">—</code></dd>
             </div>
             <div>
-              <dt class="font-medium text-zinc-400">Params</dt>
-              <dd class="mt-0.5"><code id="params-type" class="break-all font-mono text-zinc-700">—</code></dd>
+              <dt class="font-medium pg-muted">Params</dt>
+              <dd class="mt-0.5"><code id="params-type" class="break-all font-mono text-slate-300">—</code></dd>
             </div>
           </dl>
-          <a id="docs-link" href="/docs" class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-brand hover:text-brand-dark">${icon("arrow-up-right-from-square")} Open in docs</a>
+          <a id="docs-link" href="/docs" class="pg-link mt-3 inline-flex items-center gap-1.5 text-xs font-medium">${icon("arrow-up-right-from-square")} Open in docs</a>
         </div>
       </aside>
 
       <main class="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div class="border-b border-zinc-200 bg-white px-4 py-3">
-          <div class="flex flex-wrap items-center gap-2">
+        <div class="pg-surface px-4 py-3">
+          <div class="flex flex-wrap items-center gap-3">
             <span id="http-method">—</span>
             <div class="min-w-0 flex-1">
-              <p id="method-title" class="truncate text-base font-semibold text-zinc-900">Select a method</p>
-              <p class="truncate font-mono text-xs text-zinc-500">
-                <span id="qualified-service">—</span><span class="text-zinc-300"> · </span><span id="method-name-label">—</span>
+              <p id="method-title" class="truncate text-base font-semibold pg-text">Select a method</p>
+              <p class="truncate font-mono text-xs pg-muted">
+                <span id="qualified-service">—</span><span class="text-slate-600"> · </span><span id="method-name-label">—</span>
               </p>
             </div>
           </div>
 
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            <button type="button" id="send" class="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark focus:outline-2 focus:outline-brand/40">${icon("paper-plane")} Send</button>
-            <button type="button" id="reset" class="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">${icon("rotate-left")} Reset</button>
-            <button type="button" id="copy-request" class="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">${icon("copy")} Copy JSON</button>
+            <button type="button" id="send" class="pg-btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition">${icon("paper-plane")} Send</button>
+            <button type="button" id="reset" class="pg-btn-ghost inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition">${icon("rotate-left")} Reset</button>
+            <button type="button" id="copy-request" class="pg-btn-ghost inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition">${icon("copy")} Copy JSON</button>
             <div class="ml-auto flex items-center gap-2 text-sm">
-              <span id="request-status" class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-500">Ready</span>
-              <span id="request-time" class="font-mono text-xs text-zinc-400"></span>
-              <kbd class="rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">⌘↵</kbd>
+              <span id="request-status" class="pg-status-muted px-2 py-1 text-xs">Ready</span>
+              <span id="request-time" class="font-mono text-xs pg-muted"></span>
+              <kbd class="pg-code px-1.5 py-0.5 font-mono text-[10px]">⌘↵</kbd>
             </div>
           </div>
         </div>
 
         <div class="grid min-h-0 flex-1 grid-rows-2 xl:grid-cols-2 xl:grid-rows-none">
-          <section class="flex min-h-0 flex-col border-b border-zinc-200 bg-white xl:border-b-0 xl:border-r">
-            <div class="flex shrink-0 items-center justify-between border-b border-zinc-100 px-4 py-2">
-              <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">${icon("code")} Request</span>
-              <span class="text-xs text-zinc-400">JSON envelope</span>
+          <section class="pg-surface pg-split-left flex min-h-0 flex-col">
+            <div class="flex shrink-0 items-center justify-between px-4 py-2">
+              <div class="flex items-center gap-1">
+                <button type="button" id="tab-body" class="pg-tab px-2.5 py-1 text-xs font-semibold uppercase tracking-wide transition" aria-selected="true">${icon("code")} Body</button>
+                <button type="button" id="tab-headers" class="pg-tab px-2.5 py-1 text-xs font-semibold uppercase tracking-wide transition" aria-selected="false">${icon("list")} Headers <span id="header-count" class="pg-tab-count ml-1 px-1.5 py-0.5 font-mono text-[10px]">0</span></button>
+              </div>
+              <span id="request-panel-hint" class="text-xs pg-muted">JSON envelope</span>
             </div>
-            <div class="relative min-h-0 flex-1 bg-[#fafafa]">
+            <div id="panel-body" class="pg-editor-bg relative min-h-0 flex-1">
               <div id="request-editor" class="pg-monaco absolute inset-0"></div>
+            </div>
+            <div id="panel-headers" class="pg-editor-bg hidden min-h-0 flex-1 overflow-y-auto p-4">
+              <p class="mb-3 text-xs pg-muted">Headers are sent with every request. Use <code class="pg-code px-1 py-0.5 font-mono text-[11px]">Authorization</code> for auth tokens.</p>
+              <div id="headers-list" class="space-y-2"></div>
+              <button type="button" id="add-header" class="pg-btn-ghost mt-3 inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition">${icon("plus")} Add header</button>
             </div>
           </section>
 
-          <section class="pg-response-panel flex min-h-0 flex-col bg-white" data-state="idle">
-            <div class="flex shrink-0 items-center border-b border-zinc-100">
+          <section class="pg-response-panel pg-surface flex min-h-0 flex-col" data-state="idle">
+            <div class="flex shrink-0 items-center">
               <span class="pg-response-accent w-1 self-stretch"></span>
               <div class="flex flex-1 items-center justify-between px-4 py-2">
-                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">${icon("terminal")} Response</span>
-                <span id="response-status" class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-xs text-zinc-500">—</span>
+                <span class="text-xs font-semibold uppercase tracking-wide pg-muted">${icon("terminal")} Response</span>
+                <span id="response-status" class="pg-status-muted px-2 py-0.5 font-mono text-xs">—</span>
               </div>
             </div>
-            <div class="relative min-h-0 flex-1 bg-[#fafafa]">
+            <div class="pg-editor-bg relative min-h-0 flex-1">
               <div id="response-editor" class="pg-monaco absolute inset-0"></div>
             </div>
           </section>
@@ -377,17 +471,27 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
       const sendButton = document.getElementById("send");
       const resetButton = document.getElementById("reset");
       const copyButton = document.getElementById("copy-request");
+      const tabBody = document.getElementById("tab-body");
+      const tabHeaders = document.getElementById("tab-headers");
+      const panelBody = document.getElementById("panel-body");
+      const panelHeaders = document.getElementById("panel-headers");
+      const headersList = document.getElementById("headers-list");
+      const addHeaderButton = document.getElementById("add-header");
+      const headerCount = document.getElementById("header-count");
+      const requestPanelHint = document.getElementById("request-panel-hint");
+      const HEADERS_STORAGE_KEY = "srpc-playground-headers";
 
       let requestEditor = null;
       let responseEditor = null;
       let monacoApi = null;
+      let headerRows = [];
 
       const STATUS = {
-        ok: "rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700",
-        error: "rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700",
-        muted: "rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-500",
-        pending: "rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700",
-        kbd: "rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-xs text-zinc-500",
+        ok: "pg-status-ok px-2 py-1 text-xs font-medium",
+        error: "pg-status-error px-2 py-1 text-xs font-medium",
+        muted: "pg-status-muted px-2 py-1 text-xs",
+        pending: "pg-status-pending px-2 py-1 text-xs font-medium",
+        kbd: "pg-status-muted px-2 py-0.5 font-mono text-xs",
       };
 
       function setResponseState(state) {
@@ -396,17 +500,151 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
         }
       }
 
-      function httpMethodBadge(verb) {
+      function setRequestTab(tab) {
+        const isBody = tab === "body";
+        tabBody.setAttribute("aria-selected", isBody ? "true" : "false");
+        tabHeaders.setAttribute("aria-selected", isBody ? "false" : "true");
+        panelBody.classList.toggle("hidden", !isBody);
+        panelBody.classList.toggle("flex-1", isBody);
+        panelBody.classList.toggle("relative", isBody);
+        panelHeaders.classList.toggle("hidden", isBody);
+        panelHeaders.classList.toggle("flex-1", !isBody);
+        requestPanelHint.textContent = isBody ? "JSON envelope" : "Key-value request headers";
+        if (isBody && requestEditor) {
+          requestEditor.layout();
+        }
+      }
+
+      function defaultHeaders() {
+        return [
+          { key: "Authorization", value: "Bearer " },
+          { key: "Accept", value: "application/json" },
+        ];
+      }
+
+      function loadHeaders() {
+        try {
+          const raw = localStorage.getItem(HEADERS_STORAGE_KEY);
+          if (!raw) return defaultHeaders();
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed) || parsed.length === 0) return defaultHeaders();
+          return parsed.map(row => ({
+            key: String(row.key ?? ""),
+            value: String(row.value ?? ""),
+          }));
+        } catch {
+          return defaultHeaders();
+        }
+      }
+
+      function saveHeaders() {
+        const rows = collectHeaderRows();
+        headerRows = rows;
+        localStorage.setItem(HEADERS_STORAGE_KEY, JSON.stringify(rows));
+        updateHeaderCount();
+      }
+
+      function collectHeaderRows() {
+        if (!headersList) return [];
+        return [...headersList.querySelectorAll(".pg-header-row")].map(row => ({
+          key: row.querySelector(".header-key")?.value.trim() ?? "",
+          value: row.querySelector(".header-value")?.value ?? "",
+        }));
+      }
+
+      function collectRequestHeaders() {
+        const headers = {};
+        for (const row of collectHeaderRows()) {
+          if (!row.key) continue;
+          headers[row.key] = row.value;
+        }
+        return headers;
+      }
+
+      function updateHeaderCount() {
+        const count = collectHeaderRows().filter(row => row.key).length;
+        if (headerCount) {
+          headerCount.textContent = String(count);
+        }
+      }
+
+      function createHeaderRow(key, value) {
+        const row = document.createElement("div");
+        row.className = "pg-header-row grid grid-cols-[1fr_1.4fr_auto] gap-2";
+        row.innerHTML =
+          '<input type="text" class="header-key pg-input px-3 py-2 font-mono text-xs outline-none transition" placeholder="Header name" value="' +
+          escapeAttr(key) +
+          '" />' +
+          '<input type="text" class="header-value pg-input px-3 py-2 font-mono text-xs outline-none transition" placeholder="Value" value="' +
+          escapeAttr(value) +
+          '" />' +
+          '<button type="button" class="remove-header inline-flex h-9 w-9 items-center justify-center transition hover:bg-red-500/10 hover:text-red-400" style="color: #94a3b8" title="Remove header">${icon("xmark")}</button>';
+
+        row.querySelector(".header-key")?.addEventListener("input", saveHeaders);
+        row.querySelector(".header-value")?.addEventListener("input", saveHeaders);
+        row.querySelector(".remove-header")?.addEventListener("click", function () {
+          row.remove();
+          if (headersList && headersList.children.length === 0) {
+            addHeaderRow("", "");
+          }
+          saveHeaders();
+        });
+        return row;
+      }
+
+      function escapeAttr(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;");
+      }
+
+      function addHeaderRow(key, value) {
+        if (!headersList) return;
+        headersList.appendChild(createHeaderRow(key ?? "", value ?? ""));
+        saveHeaders();
+      }
+
+      function renderHeaders() {
+        if (!headersList) return;
+        headersList.innerHTML = "";
+        headerRows = loadHeaders();
+        if (headerRows.length === 0) {
+          headerRows = defaultHeaders();
+        }
+        for (const row of headerRows) {
+          headersList.appendChild(createHeaderRow(row.key, row.value));
+        }
+        updateHeaderCount();
+      }
+
+      function httpMethodClass(verb) {
+        const method = (verb || "POST").toUpperCase();
+        const classes = {
+          GET: "pg-http-get",
+          POST: "pg-http-post",
+          PUT: "pg-http-put",
+          PATCH: "pg-http-patch",
+          DELETE: "pg-http-delete",
+        };
+        return classes[method] || "pg-http-default";
+      }
+
+      function httpMethodColor(verb) {
         const method = (verb || "POST").toUpperCase();
         const colors = {
-          GET: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-          POST: "bg-blue-50 text-blue-700 ring-blue-600/20",
-          PUT: "bg-amber-50 text-amber-700 ring-amber-600/20",
-          PATCH: "bg-violet-50 text-violet-700 ring-violet-600/20",
-          DELETE: "bg-rose-50 text-rose-700 ring-rose-600/20",
+          GET: "#22C55E",
+          POST: "#3B82F6",
+          PUT: "#F59E0B",
+          PATCH: "#A855F7",
+          DELETE: "#EF4444",
         };
-        const color = colors[method] || "bg-brand/10 text-brand ring-brand/20";
-        return '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ' + color + '">' + method + "</span>";
+        return colors[method] || "#3B82F6";
+      }
+
+      function httpMethodBadge(verb) {
+        const method = (verb || "POST").toUpperCase();
+        return '<span class="inline-flex items-center px-2.5 py-1 text-xs font-bold ' + httpMethodClass(verb) + '">' + method + "</span>";
       }
 
       function option(value, label) {
@@ -461,19 +699,20 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
         const methods = service?.methods || [];
 
         if (methods.length === 0) {
-          methodList.innerHTML = '<p class="px-2 py-3 text-xs text-zinc-400">No methods in this service.</p>';
+          methodList.innerHTML = '<p class="px-2 py-3 text-xs pg-muted">No methods in this service.</p>';
           return;
         }
 
         methods.forEach(method => {
           const btn = document.createElement("button");
           btn.type = "button";
-          btn.className = "pg-method-btn flex w-full items-center gap-2 rounded-md border border-transparent px-2 py-2 text-left text-sm transition hover:border-zinc-200 hover:bg-zinc-50";
+          btn.className = "pg-method-btn flex w-full items-center gap-2 px-2 py-2 text-left text-sm transition";
           btn.dataset.method = method.method;
+          const verb = (method.httpMethod || "POST").toUpperCase();
           btn.innerHTML =
-            '<span class="shrink-0 text-[10px] font-bold uppercase text-zinc-400">' +
-            (method.httpMethod || "POST").toUpperCase() +
-            '</span><span class="truncate font-medium text-zinc-800">' +
+            '<span class="shrink-0 text-[10px] font-bold uppercase" style="color:' + httpMethodColor(method.httpMethod) + '">' +
+            verb +
+            '</span><span class="truncate font-medium text-slate-200">' +
             method.method +
             "</span>";
           btn.setAttribute("aria-current", method.method === methodSelect.value ? "true" : "false");
@@ -627,6 +866,7 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
 
         try {
           const verb = (method.httpMethod || "POST").toUpperCase();
+          const customHeaders = collectRequestHeaders();
           let response;
 
           if (verb === "GET") {
@@ -638,11 +878,17 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
             if (payload.id) {
               url.searchParams.set("id", String(payload.id));
             }
-            response = await fetch(url.toString(), { method: "GET" });
+            response = await fetch(url.toString(), {
+              method: "GET",
+              headers: customHeaders,
+            });
           } else {
             response = await fetch(bootstrap.rpcPath, {
               method: verb,
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                ...customHeaders,
+              },
               body: JSON.stringify(payload),
             });
           }
@@ -696,7 +942,7 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
 
         requestEditor = monaco.editor.create(document.getElementById("request-editor"), {
           model: monaco.editor.createModel("", "json", requestModelUri),
-          theme: "vs",
+          theme: "vs-dark",
           language: "json",
           fontFamily: ${JSON.stringify(MONACO_FONT)},
           fontSize: 13,
@@ -721,7 +967,7 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
 
         responseEditor = monaco.editor.create(document.getElementById("response-editor"), {
           model: monaco.editor.createModel("// Send a request to see the response here.\\n// Press Send or use ⌘↵", "json", monaco.Uri.parse(RESPONSE_MODEL_URI)),
-          theme: "vs",
+          theme: "vs-dark",
           language: "json",
           readOnly: true,
           fontFamily: ${JSON.stringify(MONACO_FONT)},
@@ -741,9 +987,14 @@ function renderPlaygroundPage(bootstrap: PlaygroundBootstrap): string {
         fillPackageOptions();
         fillServiceOptions();
         fillMethodOptions();
+        renderHeaders();
         syncFromQuery();
         setEditorFromMethod();
         updateQuery();
+
+        tabBody.addEventListener("click", function () { setRequestTab("body"); });
+        tabHeaders.addEventListener("click", function () { setRequestTab("headers"); });
+        addHeaderButton.addEventListener("click", function () { addHeaderRow("", ""); });
 
         packageSelect.addEventListener("change", function () {
           fillServiceOptions();
