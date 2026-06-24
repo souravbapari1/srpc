@@ -67,7 +67,7 @@ export function renderMethodBlock(
   const paramsDetail =
     method.params.length === 0
       ? ""
-      : `<details class="mt-3 bg-white/5 p-3 text-sm text-slate-400">
+      : `<details class="mt-3 rounded-lg bg-white/5 p-3 text-sm text-slate-400">
           <summary class="cursor-pointer font-medium text-slate-300">Show field types (advanced)</summary>
           <p class="mt-2">${method.params
             .map(

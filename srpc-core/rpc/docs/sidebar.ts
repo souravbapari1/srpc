@@ -66,7 +66,7 @@ export function renderSidebar(ctx: PageContext): string {
     <div class="flex h-full flex-col overflow-y-auto p-4">
       <div class="mb-6 flex items-center justify-between gap-2">
         <a href="/docs" class="flex items-center gap-2.5 text-sm font-semibold text-slate-100">
-          <span class="flex h-8 w-8 items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-400 text-white">${icon("book")}</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 text-white">${icon("book")}</span>
           <span>SRPC API</span>
         </a>
       </div>

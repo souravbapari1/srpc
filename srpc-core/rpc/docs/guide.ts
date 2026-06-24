@@ -110,19 +110,19 @@ export function renderQuickStart(store: ContractDocsStore): string {
     <p class="mb-5 text-sm leading-relaxed text-slate-400">New to SRPC? Follow these steps once, then explore any API below.</p>
     <ol class="space-y-4 text-sm text-slate-300">
       <li class="flex gap-3">
-        <span class="flex h-6 w-6 shrink-0 items-center justify-center bg-brand text-xs font-bold text-white">1</span>
+        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">1</span>
         <span><strong class="text-slate-100">Pick an API.</strong> Start with <a href="${example.link}" class="${cls.link}">${example.label}</a> or open the <a href="/playground" class="${cls.link}">Playground</a> to try calls in your browser.</span>
       </li>
       <li class="flex gap-3">
-        <span class="flex h-6 w-6 shrink-0 items-center justify-center bg-brand text-xs font-bold text-white">2</span>
+        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">2</span>
         <span><strong class="text-slate-100">Copy the request body.</strong> Every method page includes a ready-to-use JSON example.</span>
       </li>
       <li class="flex gap-3">
-        <span class="flex h-6 w-6 shrink-0 items-center justify-center bg-brand text-xs font-bold text-white">3</span>
+        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">3</span>
         <span><strong class="text-slate-100">Send it to</strong> <code class="${cls.codeXs}">POST /srpc</code> (or use GET for read-only methods).</span>
       </li>
       <li class="flex gap-3">
-        <span class="flex h-6 w-6 shrink-0 items-center justify-center bg-brand text-xs font-bold text-white">4</span>
+        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">4</span>
         <span><strong class="text-slate-100">Read the JSON response.</strong> A successful call returns your data. Errors explain what went wrong.</span>
       </li>
     </ol>
@@ -158,7 +158,7 @@ export function renderKeyConcepts(): string {
 }
 
 export function renderPlaygroundCallout(): string {
-  return `<div class="mb-6 flex flex-col gap-3 bg-docs-panel p-5 sm:flex-row sm:items-center sm:justify-between">
+  return `<div class="mb-6 flex flex-col gap-3 rounded-xl bg-docs-panel p-5 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <p class="font-semibold text-slate-100">${icon("flask")} Prefer clicking over curl?</p>
       <p class="mt-1 text-sm text-slate-400">Use the Playground to pick a method, edit the JSON, and send a live request — no extra tools needed.</p>

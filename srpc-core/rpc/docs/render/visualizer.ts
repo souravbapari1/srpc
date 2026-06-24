@@ -28,11 +28,11 @@ export function renderVisualizer(store: ContractDocsStore): string {
       ${panelHeading("sliders", "View options")}
       <div class="mb-4 flex flex-wrap items-center gap-4">
         <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-400">
-          <input type="checkbox" id="viz-show-services" checked class="bg-white/5 text-brand focus:ring-brand/30" />
+          <input type="checkbox" id="viz-show-services" checked class="rounded bg-white/5 text-brand focus:ring-brand/30" />
           Show services
         </label>
         <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-400">
-          <input type="checkbox" id="viz-physics" checked class="bg-white/5 text-brand focus:ring-brand/30" />
+          <input type="checkbox" id="viz-physics" checked class="rounded bg-white/5 text-brand focus:ring-brand/30" />
           Physics layout
         </label>
         <button type="button" class="${cls.btnSecondary}" id="viz-fit">${icon("expand")} Fit view</button>
@@ -46,10 +46,10 @@ export function renderVisualizer(store: ContractDocsStore): string {
         </button>
       </div>
       <div class="mt-4 flex flex-wrap gap-4 text-sm text-slate-500">
-        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 bg-brand"></i> Package</span>
-        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 bg-docs-sidebar"></i> Service</span>
-        <span class="inline-flex items-center gap-2"><i class="inline-block h-0.5 w-5 bg-slate-500"></i> Type dependency</span>
-        <span class="inline-flex items-center gap-2"><i class="inline-block h-0.5 w-5 bg-slate-600 opacity-60"></i> Contains service</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 rounded-sm bg-brand"></i> Package</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 rounded-sm bg-docs-sidebar"></i> Service</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-0.5 w-5 rounded bg-slate-500"></i> Type dependency</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-0.5 w-5 rounded bg-slate-600 opacity-60"></i> Contains service</span>
       </div>
     </article>
     <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>

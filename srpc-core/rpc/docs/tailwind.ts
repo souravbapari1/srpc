@@ -24,12 +24,12 @@ tailwind.config = {
 
 export const DOCS_EXTRA_STYLES = `
   body { background: #0d1117; color: #e6edf3; }
-  body, body * { border-radius: 0 !important; }
   .sidebar { background: #161b22; }
   .contract-graph {
     width: 100%;
     height: 32rem;
     margin-top: 0.75rem;
+    border-radius: 0.75rem;
     background:
       radial-gradient(circle at 1px 1px, #30363d 1px, transparent 0) 0 0 / 20px 20px,
       #0d1117;
@@ -60,6 +60,7 @@ export const DOCS_EXTRA_STYLES = `
   .code-pre {
     margin: 0;
     overflow-x: auto;
+    border-radius: 0.75rem;
     background: #0d1117;
     padding: 1.25rem 1.5rem;
     font-family: "JetBrains Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
