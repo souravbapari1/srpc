@@ -10,6 +10,11 @@ import {
   type CreateContractsApiOptions,
 } from "./contracts-router.ts";
 import {
+  createSrpcPlaygroundRouter,
+  SRPC_PLAYGROUND_PATH,
+  type CreateSrpcPlaygroundOptions,
+} from "./playground.ts";
+import {
   createSrpcHttpHandler,
   type HandleSrpcOptions,
   type HttpMethodRegistry,
@@ -42,6 +47,13 @@ export interface SrpcContractsApiOptions {
   apiKey?: string;
 }
 
+export interface SrpcPlaygroundOptions {
+  /** Directory with `.ctr` / `.rpc` contract files. */
+  contractDir: string;
+  /** Playground base path. Defaults to `/playground`. */
+  path?: string;
+}
+
 export interface CreateSrpcServerOptions {
   /** `DefinedService[]` from `defineService()` — HTTP verbs are inferred automatically. */
   services: DefinedService[] | ServiceRegistry;
@@ -52,6 +64,8 @@ export interface CreateSrpcServerOptions {
   logger?: SrpcLogger | boolean;
   /** Serve contract docs at `/docs` (or custom path). */
   docs?: boolean | SrpcDocsServerOptions;
+  /** Serve a built-in browser request tester at `/playground` (or custom path). */
+  playground?: boolean | SrpcPlaygroundOptions;
 }
 
 function resolveContractsApiOptions(
@@ -166,6 +180,39 @@ function mountDocsRouter(
   router.use(docsPath, createSrpcDocsRouter(docsOptions));
 }
 
+function resolvePlaygroundOptions(
+  playground: boolean | SrpcPlaygroundOptions | undefined,
+  rpcPath: string
+): CreateSrpcPlaygroundOptions | undefined {
+  if (!playground) {
+    return undefined;
+  }
+
+  return {
+    contractDir:
+      typeof playground === "object" ? playground.contractDir : "contract",
+    rpcPath,
+  };
+}
+
+function mountPlaygroundRouter(
+  router: Router,
+  playground: boolean | SrpcPlaygroundOptions | undefined,
+  rpcPath: string
+): void {
+  const playgroundOptions = resolvePlaygroundOptions(playground, rpcPath);
+  if (!playgroundOptions) {
+    return;
+  }
+
+  const playgroundPath =
+    typeof playground === "object" && playground.path
+      ? playground.path
+      : SRPC_PLAYGROUND_PATH;
+
+  router.use(playgroundPath, createSrpcPlaygroundRouter(playgroundOptions));
+}
+
 export function createSrpcRouter(options: CreateSrpcServerOptions): Router {
   const router = express.Router();
   const path = options.path ?? SRPC_RPC_PATH;
@@ -178,6 +225,7 @@ export function createSrpcRouter(options: CreateSrpcServerOptions): Router {
   router.delete(path, handler);
 
   mountDocsRouter(router, options.docs, options.services);
+  mountPlaygroundRouter(router, options.playground, path);
 
   const contractDir =
     typeof options.docs === "object"

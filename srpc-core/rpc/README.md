@@ -92,6 +92,7 @@ app.use(
 | `GET /docs` | HTML index of all contract packages |
 | `GET /docs/:package` | Structs, enums, and services in a package |
 | `GET /docs/:package/:service` | Methods, HTTP verbs, params, and return types |
+| `GET /playground` | Browser UI for testing SRPC methods live |
 
 Pages are **HTML by default** in the browser. Append `?format=json` (or send `Accept: application/json`) for the JSON API.
 
@@ -101,6 +102,36 @@ Use `docs: true` to scan `./contract` from the current working directory, or pas
 
 ```typescript
 docs: { contractDir: "./contract", path: "/docs" }
+```
+
+### SRPC Playground
+
+Enable a lightweight browser tester powered by your contract metadata:
+
+```typescript
+app.use(
+  createSrpcRouter({
+    services: [userService],
+    docs: { contractDir: "./contract" },
+    playground: { contractDir: "./contract" },
+  })
+);
+```
+
+The playground is served at `GET /playground` by default.
+
+Features:
+
+- package, service, and method selection from live contract docs
+- Monaco JSON editor with contract-driven field autocomplete and validation
+- schema-driven request body scaffolding
+- live calls to the existing `/srpc` endpoint
+- formatted JSON response output
+
+You can customize the route:
+
+```typescript
+playground: { contractDir: "./contract", path: "/srpc-ui" }
 ```
 
 See [example/](./example/) for the full project layout.

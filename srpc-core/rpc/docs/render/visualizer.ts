@@ -2,7 +2,7 @@ import type { ContractDocsStore } from "../../src/contract-docs.ts";
 import { buildContractGraph } from "../contract-graph.ts";
 import { page } from "../layout.ts";
 import { DOCS_THEME } from "../theme.ts";
-import { icon, panelHeading, statCard } from "../ui.ts";
+import { cls, icon, panelHeading, statCard } from "../ui.ts";
 
 export function renderVisualizer(store: ContractDocsStore): string {
   const graph = buildContractGraph(store, { includeServices: true });
@@ -11,45 +11,45 @@ export function renderVisualizer(store: ContractDocsStore): string {
 
   return page(
     "Contract visualizer",
-    `<article class="panel panel-hero">
-      <h1>${icon("diagram-project", "title-icon")} Contract visualizer</h1>
-      <p class="lead">
+    `<article class="${cls.panel}">
+      <h1 class="${cls.h1}">${icon("diagram-project", cls.h1Icon)} Contract visualizer</h1>
+      <p class="${cls.lead}">
         Interactive map of your contract packages, services, and cross-package type dependencies.
         Drag nodes to reposition — they stay where you drop them. Arrows show which packages reference types from another package.
       </p>
-      <div class="stats">
+      <div class="${cls.stats}">
         ${statCard("boxes-stacked", graph.stats.packages, "packages", "packages")}
         ${statCard("server", graph.stats.services, "services", "services")}
         ${statCard("share-nodes", graph.stats.packageLinks, "package links", "methods")}
         ${statCard("link", graph.stats.serviceLinks, "service nodes", "services")}
       </div>
     </article>
-    <article class="panel">
+    <article class="${cls.panel}">
       ${panelHeading("sliders", "View options")}
-      <div class="viz-controls">
-        <label class="viz-toggle">
-          <input type="checkbox" id="viz-show-services" checked />
+      <div class="mb-4 flex flex-wrap items-center gap-4">
+        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-zinc-600">
+          <input type="checkbox" id="viz-show-services" checked class="rounded border-zinc-300 text-brand focus:ring-brand/30" />
           Show services
         </label>
-        <label class="viz-toggle">
-          <input type="checkbox" id="viz-physics" checked />
+        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-zinc-600">
+          <input type="checkbox" id="viz-physics" checked class="rounded border-zinc-300 text-brand focus:ring-brand/30" />
           Physics layout
         </label>
-        <button type="button" class="viz-btn" id="viz-fit">${icon("expand")} Fit view</button>
-        <button type="button" class="viz-btn" id="viz-fullscreen">${icon("maximize")} Full screen</button>
+        <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:border-brand hover:text-brand" id="viz-fit">${icon("expand")} Fit view</button>
+        <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:border-brand hover:text-brand" id="viz-fullscreen">${icon("maximize")} Full screen</button>
       </div>
-      <p class="meta" id="viz-selection">Click a node to see details and open its docs page.</p>
+      <p class="${cls.meta} mb-2" id="viz-selection">Click a node to see details and open its docs page.</p>
       <div class="viz-stage" id="viz-stage">
         <div id="contract-graph" class="contract-graph" role="img" aria-label="Contract dependency graph"></div>
-        <button type="button" class="viz-fullscreen-exit" id="viz-exit-fullscreen" hidden>
+        <button type="button" class="viz-fullscreen-exit inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-800 shadow-sm transition hover:text-brand" id="viz-exit-fullscreen" hidden>
           ${icon("compress")} Exit full screen
         </button>
       </div>
-      <div class="viz-legend">
-        <span><i class="viz-swatch package"></i> Package</span>
-        <span><i class="viz-swatch service"></i> Service</span>
-        <span><i class="viz-line solid"></i> Type dependency</span>
-        <span><i class="viz-line dashed"></i> Contains service</span>
+      <div class="mt-4 flex flex-wrap gap-4 text-sm text-zinc-500">
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 rounded-sm border-2 border-brand bg-white"></i> Package</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block h-3 w-3 rounded-sm border border-zinc-300 bg-zinc-50"></i> Service</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block w-5 border-t-2 border-zinc-400"></i> Type dependency</span>
+        <span class="inline-flex items-center gap-2"><i class="inline-block w-5 border-t-2 border-dashed border-zinc-300"></i> Contains service</span>
       </div>
     </article>
     <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>

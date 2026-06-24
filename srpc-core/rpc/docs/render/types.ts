@@ -6,7 +6,7 @@ import type {
 } from "../../src/contract-docs.ts";
 import { escapeHtml } from "../escape.ts";
 import { buildTypeLinkIndex, linkifyContractType } from "../type-links.ts";
-import { icon } from "../ui.ts";
+import { cls, icon, panelHeading } from "../ui.ts";
 
 export function renderStructCard(
   store: ContractDocsStore,
@@ -17,22 +17,28 @@ export function renderStructCard(
   const fields = struct.fields
     .map(
       field =>
-        `<li><span class="name">${escapeHtml(field.name)}${field.optional ? "?" : ""}</span> — ${linkifyContractType(field.type, typeIndex, packageName)}</li>`
+        `<li class="text-sm text-zinc-600"><span class="font-medium text-zinc-900">${escapeHtml(field.name)}${field.optional ? "?" : ""}</span> — ${linkifyContractType(field.type, typeIndex, packageName)}</li>`
     )
     .join("");
 
-  return `<div class="type-card struct-card">
-    <h4><span class="type-icon struct">${icon("table-cells")}</span> <a href="/docs/${escapeHtml(packageName)}/structs/${escapeHtml(struct.name)}"><code>${escapeHtml(struct.name)}</code></a></h4>
-    <p class="qualified" style="margin:0 0 0.5rem;font-size:0.75rem;color:#a1a1aa">${escapeHtml(struct.qualifiedName)}</p>
-    <ul class="fields">${fields || '<li class="empty">No fields</li>'}</ul>
+  return `<div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+    <h4 class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
+      <span class="text-zinc-400">${icon("table-cells")}</span>
+      <a href="/docs/${escapeHtml(packageName)}/structs/${escapeHtml(struct.name)}" class="hover:text-brand"><code class="font-mono">${escapeHtml(struct.name)}</code></a>
+    </h4>
+    <p class="mt-1 font-mono text-xs text-zinc-400">${escapeHtml(struct.qualifiedName)}</p>
+    <ul class="mt-3 space-y-1">${fields || `<li class="${cls.empty}">No fields</li>`}</ul>
   </div>`;
 }
 
 export function renderEnumCard(packageName: string, enumDoc: EnumDoc): string {
-  return `<div class="type-card enum-card">
-    <h4><span class="type-icon enum">${icon("list-ul")}</span> <a href="/docs/${escapeHtml(packageName)}/enums/${escapeHtml(enumDoc.name)}"><code>${escapeHtml(enumDoc.name)}</code></a></h4>
-    <p class="qualified" style="margin:0 0 0.5rem;font-size:0.75rem;color:#a1a1aa">${escapeHtml(enumDoc.qualifiedName)}</p>
-    <p class="meta">${enumDoc.values.map(escapeHtml).join(" · ")}</p>
+  return `<div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+    <h4 class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
+      <span class="text-zinc-400">${icon("list-ul")}</span>
+      <a href="/docs/${escapeHtml(packageName)}/enums/${escapeHtml(enumDoc.name)}" class="hover:text-brand"><code class="font-mono">${escapeHtml(enumDoc.name)}</code></a>
+    </h4>
+    <p class="mt-1 font-mono text-xs text-zinc-400">${escapeHtml(enumDoc.qualifiedName)}</p>
+    <p class="${cls.meta} mt-3">${enumDoc.values.map(escapeHtml).join(" · ")}</p>
   </div>`;
 }
 
@@ -42,26 +48,28 @@ export function renderFieldsTable(
   struct: StructDoc
 ): string {
   if (struct.fields.length === 0) {
-    return `<p class="empty">This struct has no fields.</p>`;
+    return `<p class="${cls.empty}">This struct has no fields.</p>`;
   }
 
   const typeIndex = buildTypeLinkIndex(store);
   const rows = struct.fields
     .map(
-      field => `<tr>
-        <td><code>${escapeHtml(field.name)}</code></td>
-        <td>${linkifyContractType(field.type, typeIndex, packageName)}</td>
-        <td>${field.optional ? "Optional" : "Required"}</td>
+      field => `<tr class="border-b border-zinc-100 last:border-0">
+        <td class="py-2.5 pr-4"><code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(field.name)}</code></td>
+        <td class="py-2.5 pr-4 text-sm text-zinc-700">${linkifyContractType(field.type, typeIndex, packageName)}</td>
+        <td class="py-2.5 text-sm text-zinc-500">${field.optional ? "Optional" : "Required"}</td>
       </tr>`
     )
     .join("");
 
-  return `<table class="fields-table">
+  return `<div class="overflow-x-auto"><table class="w-full text-left text-sm">
     <thead>
-      <tr><th>Field</th><th>Type</th><th>Required</th></tr>
+      <tr class="border-b border-zinc-200 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+        <th class="pb-2 pr-4">Field</th><th class="pb-2 pr-4">Type</th><th class="pb-2">Required</th>
+      </tr>
     </thead>
     <tbody>${rows}</tbody>
-  </table>`;
+  </table></div>`;
 }
 
 export function exampleStructJson(struct: StructDoc): string {
@@ -92,23 +100,23 @@ export function renderTypeSection(store: ContractDocsStore, pkg: ContractPackage
     pkg.structs.length === 0
       ? ""
       : `<div>
-          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap">
-            <h2 style="margin-top:0;display:flex;align-items:center;gap:0.45rem">${icon("table-cells", "panel-icon")} Structs</h2>
-            <a href="/docs/${escapeHtml(pkg.package)}/structs" style="font-size:0.8125rem">View all structs →</a>
+          <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 class="${cls.sectionTitle} !mb-0">${icon("table-cells", "text-brand")} Structs</h2>
+            <a href="/docs/${escapeHtml(pkg.package)}/structs" class="text-sm font-medium text-brand hover:text-brand-dark">View all →</a>
           </div>
-          <div class="type-grid">${pkg.structs.map(struct => renderStructCard(store, pkg.package, struct)).join("")}</div>
+          <div class="grid gap-4 sm:grid-cols-2">${pkg.structs.map(struct => renderStructCard(store, pkg.package, struct)).join("")}</div>
         </div>`;
 
   const enums =
     pkg.enums.length === 0
       ? ""
-      : `<div style="margin-top:1.5rem">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap">
-            <h2 style="display:flex;align-items:center;gap:0.45rem">${icon("list-ul", "panel-icon")} Enums</h2>
-            <a href="/docs/${escapeHtml(pkg.package)}/enums" style="font-size:0.8125rem">View all enums →</a>
+      : `<div class="mt-8">
+          <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 class="${cls.sectionTitle} !mb-0">${icon("list-ul", "text-brand")} Enums</h2>
+            <a href="/docs/${escapeHtml(pkg.package)}/enums" class="text-sm font-medium text-brand hover:text-brand-dark">View all →</a>
           </div>
-          <div class="type-grid">${pkg.enums.map(enumDoc => renderEnumCard(pkg.package, enumDoc)).join("")}</div>
+          <div class="grid gap-4 sm:grid-cols-2">${pkg.enums.map(enumDoc => renderEnumCard(pkg.package, enumDoc)).join("")}</div>
         </div>`;
 
-  return `<article class="panel">${structs}${enums}</article>`;
+  return `<article class="${cls.panel}">${structs}${enums}</article>`;
 }

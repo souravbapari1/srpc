@@ -1,6 +1,7 @@
 import type { ContractDocsStore } from "../../src/contract-docs.ts";
 import { escapeHtml } from "./escape.ts";
 import type { TypeLinkRef } from "./types.ts";
+import { cls } from "./ui.ts";
 
 const PRIMITIVE_TYPES = new Set([
   "string",
@@ -125,7 +126,7 @@ function typeDocHref(ref: TypeLinkRef): string {
 }
 
 function renderTypeLink(ref: TypeLinkRef, display: string): string {
-  return `<a href="${escapeHtml(typeDocHref(ref))}" class="type">${escapeHtml(display)}</a>`;
+  return `<a href="${escapeHtml(typeDocHref(ref))}" class="${cls.typeLink}">${escapeHtml(display)}</a>`;
 }
 
 export function linkifyContractType(
@@ -139,7 +140,7 @@ export function linkifyContractType(
   }
 
   if (trimmed.startsWith("{")) {
-    return `<span class="type">${escapeHtml(trimmed)}</span>`;
+    return `<span class="font-medium text-blue-700">${escapeHtml(trimmed)}</span>`;
   }
 
   const arrayMatch = trimmed.match(/^(.+)\[\]$/);
@@ -169,5 +170,5 @@ export function linkifyContractType(
     return renderTypeLink(ref, trimmed);
   }
 
-  return `<span class="type">${escapeHtml(trimmed)}</span>`;
+  return `<span class="font-medium text-blue-700">${escapeHtml(trimmed)}</span>`;
 }

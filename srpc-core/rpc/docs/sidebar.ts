@@ -1,7 +1,7 @@
 import type { ServiceListing } from "../../src/contract-docs.ts";
 import { escapeHtml } from "./escape.ts";
 import type { PageContext } from "./types.ts";
-import { icon } from "./ui.ts";
+import { icon, navLink, pkgNavLink } from "./ui.ts";
 
 export function renderSidebar(ctx: PageContext): string {
   const { store, activePackage, activeService, activeTypes, activeVisualizer, activeTypeKind, activeTypeName } = ctx;
@@ -25,7 +25,7 @@ export function renderSidebar(ctx: PageContext): string {
           activeTypeKind === "struct" &&
           !activeTypeName;
         typeLinks.push(
-          `<li><a class="${structsActive ? "active" : ""}" href="/docs/${escapeHtml(packageName)}/structs"><span class="nav-icon struct-icon">${icon("table-cells")}</span> Structs (${pkg.structs.length})</a></li>`
+          `<li class="ml-3"><a class="${navLink(structsActive)}" href="/docs/${escapeHtml(packageName)}/structs">${icon("table-cells")} Structs (${pkg.structs.length})</a></li>`
         );
       }
 
@@ -35,7 +35,7 @@ export function renderSidebar(ctx: PageContext): string {
           activeTypeKind === "enum" &&
           !activeTypeName;
         typeLinks.push(
-          `<li><a class="${enumsActive ? "active" : ""}" href="/docs/${escapeHtml(packageName)}/enums"><span class="nav-icon enum-icon">${icon("list-ul")}</span> Enums (${pkg.enums.length})</a></li>`
+          `<li class="ml-3"><a class="${navLink(enumsActive)}" href="/docs/${escapeHtml(packageName)}/enums">${icon("list-ul")} Enums (${pkg.enums.length})</a></li>`
         );
       }
 
@@ -43,7 +43,7 @@ export function renderSidebar(ctx: PageContext): string {
         .map(service => {
           const active =
             activePackage === packageName && activeService === service.name;
-          return `<li><a class="${active ? "active" : ""}" href="/docs/${escapeHtml(packageName)}/${escapeHtml(service.name)}"><span class="nav-icon svc-icon">${icon("plug")}</span> ${escapeHtml(service.name)}</a></li>`;
+          return `<li class="ml-3"><a class="${navLink(active)}" href="/docs/${escapeHtml(packageName)}/${escapeHtml(service.name)}">${icon("plug")} ${escapeHtml(service.name)}</a></li>`;
         })
         .join("");
 
@@ -52,21 +52,37 @@ export function renderSidebar(ctx: PageContext): string {
         !activeService &&
         !activeTypeKind &&
         !activeTypeName;
-      return `<li class="pkg"><a class="${pkgActive ? "active" : ""}" href="/docs/${escapeHtml(packageName)}"><span class="nav-icon pkg-icon">${icon("box")}</span> ${escapeHtml(packageName)}</a></li>${typeLinks.join("")}${serviceLinks}`;
+      return `<li class="mt-3">
+        <a class="${pkgNavLink(pkgActive)}" href="/docs/${escapeHtml(packageName)}">${icon("box")} ${escapeHtml(packageName)}</a>
+        <ul class="mt-1 space-y-0.5">${typeLinks.join("")}${serviceLinks}</ul>
+      </li>`;
     })
     .join("");
 
   const overviewActive =
     !activePackage && !activeService && !activeTypes && !activeVisualizer && !activeTypeKind;
 
-  return `<aside class="sidebar">
-    <p class="sidebar-brand"><a href="/docs">${icon("book")} SRPC API</a></p>
-    <h2>${icon("compass")} Navigation</h2>
-    <ul class="nav-list">
-      <li><a class="${overviewActive ? "active" : ""}" href="/docs"><span class="nav-icon">${icon("house")}</span> Overview</a></li>
-      <li><a class="${activeTypes ? "active" : ""}" href="/docs/types"><span class="nav-icon struct-icon">${icon("cubes")}</span> Data types</a></li>
-      <li><a class="${activeVisualizer ? "active" : ""}" href="/docs/visualizer"><span class="nav-icon">${icon("diagram-project")}</span> Visualizer</a></li>
-      ${packageNav}
-    </ul>
+  return `<aside class="sidebar border-b border-zinc-200 bg-white md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-b-0 md:border-r">
+    <div class="flex h-full flex-col overflow-y-auto p-4">
+      <div class="mb-6 flex items-center justify-between gap-2">
+        <a href="/docs" class="flex items-center gap-2 text-sm font-semibold text-brand">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10">${icon("book")}</span>
+          <span>SRPC API</span>
+        </a>
+      </div>
+      <nav>
+        <p class="mb-2 px-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("compass")} Navigation</p>
+        <ul class="space-y-0.5">
+          <li><a class="${navLink(overviewActive)}" href="/docs">${icon("house")} Overview</a></li>
+          <li><a class="${navLink(activeTypes ?? false)}" href="/docs/types">${icon("cubes")} Data types</a></li>
+          <li><a class="${navLink(activeVisualizer ?? false)}" href="/docs/visualizer">${icon("diagram-project")} Visualizer</a></li>
+        </ul>
+        <p class="mb-2 mt-6 px-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("box")} Packages</p>
+        <ul class="space-y-0.5">${packageNav}</ul>
+      </nav>
+      <div class="mt-auto border-t border-zinc-100 pt-4">
+        <a href="/playground" class="${navLink(false)}">${icon("flask")} Playground</a>
+      </div>
+    </div>
   </aside>`;
 }

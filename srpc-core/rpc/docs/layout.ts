@@ -1,25 +1,23 @@
 import { escapeHtml } from "./escape.ts";
 import { renderSidebar } from "./sidebar.ts";
-import { DOCS_STYLES } from "./styles.ts";
+import { renderDocsHead } from "./tailwind.ts";
 import type { PageContext } from "./types.ts";
-import { icon } from "./ui.ts";
+import { cls, icon } from "./ui.ts";
 
 export function page(title: string, body: string, ctx: PageContext): string {
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(title)} · SRPC API Docs</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>${DOCS_STYLES}</style>
+  ${renderDocsHead(title)}
 </head>
-<body>
-  <div class="layout">
+<body class="min-h-full bg-zinc-100 font-sans text-zinc-900 antialiased">
+  <div class="min-h-screen md:grid md:grid-cols-[16rem_minmax(0,1fr)]">
     ${renderSidebar(ctx)}
-    <main class="main">
-      ${body}
-      <p class="footer">${icon("file-contract")} Generated from SRPC contracts · ${icon("download")} <a href="?format=json">Download JSON</a></p>
+    <main class="min-w-0 px-4 py-6 lg:px-8 lg:py-8">
+      <div class="mx-auto max-w-5xl">
+        ${body}
+        <p class="${cls.footer}">${icon("file-contract")} Generated from SRPC contracts · ${icon("download")} <a href="?format=json" class="text-brand hover:text-brand-dark">Download JSON</a></p>
+      </div>
     </main>
   </div>
 </body>

@@ -28,7 +28,12 @@ export {
 } from "./context.ts";
 
 export { createSrpcRouter, createSrpcServer } from "./server.ts";
-export type { CreateSrpcServerOptions, SrpcDocsServerOptions, SrpcContractsApiOptions } from "./server.ts";
+export type {
+  CreateSrpcServerOptions,
+  SrpcDocsServerOptions,
+  SrpcContractsApiOptions,
+  SrpcPlaygroundOptions,
+} from "./server.ts";
 
 export {
   createSrpcDocsRouter,
@@ -43,6 +48,12 @@ export {
   SRPC_CONTRACTS_API_PATH,
   type CreateContractsApiOptions,
 } from "./contracts-router.ts";
+
+export {
+  createSrpcPlaygroundRouter,
+  SRPC_PLAYGROUND_PATH,
+  type CreateSrpcPlaygroundOptions,
+} from "./playground.ts";
 
 export {
   buildContractGraph,

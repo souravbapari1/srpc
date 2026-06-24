@@ -4,6 +4,7 @@ import express from "express";
 import { buildContractDocs } from "../src/contract-docs.ts";
 import { buildContractGraph } from "../rpc/docs/contract-graph.ts";
 import { createSrpcDocsRouter } from "../rpc/docs/router.ts";
+import { createSrpcPlaygroundRouter } from "../rpc/playground.ts";
 import { createSrpcRouter, defineService } from "../rpc/index.ts";
 import { UserService } from "../../example/generated/srpc-types.ts";
 import type { SrpcHandlerContext } from "../rpc/context.ts";
@@ -214,6 +215,76 @@ test("createSrpcRouter mounts docs when enabled", async () => {
     expect(contractsRes.status).toBe(200);
     const contracts = await contractsRes.json();
     expect(contracts.contracts.some((entry: { package: string }) => entry.package === "user")).toBe(
+      true
+    );
+  });
+});
+
+test("playground router serves HTML by default and JSON bootstrap with ?format=json", async () => {
+  const app = express();
+  app.use("/playground", createSrpcPlaygroundRouter({ contractDir, rpcPath: "/srpc" }));
+
+  await withServer(app, async baseUrl => {
+    const htmlRes = await fetch(`${baseUrl}/playground`);
+    expect(htmlRes.status).toBe(200);
+    expect(htmlRes.headers.get("content-type")).toContain("text/html");
+    const html = await htmlRes.text();
+    expect(html).toContain("SRPC Playground");
+    expect(html).toContain('id="pg-app"');
+    expect(html).toContain("tailwindcss.com");
+    expect(html).toContain("request-editor");
+    expect(html).toContain("monaco-editor");
+    expect(html).toContain("> Send</button>");
+
+    const jsonRes = await fetch(`${baseUrl}/playground?format=json`);
+    expect(jsonRes.status).toBe(200);
+    expect(jsonRes.headers.get("content-type")).toContain("application/json");
+    const body = await jsonRes.json();
+    expect(body.rpcPath).toBe("/srpc");
+    expect(body.packages.some((pkg: { name: string }) => pkg.name === "demo")).toBe(
+      true
+    );
+
+    const demoPkg = body.packages.find((pkg: { name: string }) => pkg.name === "demo");
+    expect(demoPkg).toBeDefined();
+    const demoService = demoPkg.services.find(
+      (service: { name: string }) => service.name === "DemoService"
+    );
+    expect(demoService).toBeDefined();
+    const pingMethod = demoService.methods.find(
+      (method: { method: string }) => method.method === "ping"
+    );
+    expect(pingMethod.httpMethod).toBe("GET");
+    expect(pingMethod.requestTemplate.service).toBe("demo.DemoService");
+    expect(pingMethod.requestTemplate.params.message).toBe("");
+    expect(pingMethod.requestSchema.properties.params).toEqual({
+      type: "object",
+      properties: { message: { type: "string" } },
+      required: ["message"],
+    });
+  });
+});
+
+test("createSrpcRouter mounts playground when enabled", async () => {
+  const app = express();
+  app.use(
+    createSrpcRouter({
+      services: [
+        defineService(UserService, {
+          getUser: ({ id }: { id: string }, _ctx: SrpcHandlerContext) => ({ id }),
+        }),
+      ],
+      docs: { contractDir },
+      playground: { contractDir },
+    })
+  );
+
+  await withServer(app, async baseUrl => {
+    const res = await fetch(`${baseUrl}/playground?format=json`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.rpcPath).toBe("/srpc");
+    expect(body.packages.some((pkg: { name: string }) => pkg.name === "user")).toBe(
       true
     );
   });

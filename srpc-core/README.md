@@ -22,6 +22,24 @@ console.log(result.filesRead);
 console.log(result.errors);
 ```
 
+## Built-in HTTP tooling
+
+`srpc-core/rpc` can expose more than the `/srpc` endpoint. When enabled, it can also mount:
+
+- HTML contract docs at `/docs`
+- contract read/write API at `/api/contracts`
+- a browser request tester at `/playground`
+
+Example:
+
+```typescript
+createSrpcRouter({
+  services,
+  docs: { contractDir: "./contract" },
+  playground: { contractDir: "./contract" },
+});
+```
+
 ## Output
 
 | Contract | TypeScript |

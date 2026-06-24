@@ -31,6 +31,9 @@ app.use(
     services,
     logger: true,
     docs: { contractDir: "./contract" },
+    playground: {
+      contractDir: "./contract",
+    }
   })
 );
 
