@@ -36,20 +36,34 @@ app.use(
 app.listen(3100, () => {
   console.log("SRPC server listening on http://localhost:3100");
   console.log("Contract docs at http://localhost:3100/docs");
+  console.log("Playground at http://localhost:3100/playground");
   console.log("Contract API at http://localhost:3100/api/contracts");
 });`}
         </CodeBlock>
       </DocsSection>
 
-      <DocsSection title="Contract docs & API">
+      <DocsSection title="Contract docs, playground & API">
         <p>
-          Enable <code>docs</code> to serve contract documentation and the
-          internal contract API alongside RPC. See{" "}
+          Enable <code>docs</code> and <code>playground</code> to serve contract
+          documentation, a browser request tester, and the internal contract API
+          alongside RPC. See{" "}
           <Link href="/docs/system" className="text-accent-bright hover:underline">
             System docs & APIs
           </Link>{" "}
-          for every route, JSON output, use cases, and sync workflows.
+          for every route and{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>{" "}
+          for protecting these surfaces.
         </p>
+        <CodeBlock title="index.ts" language="typescript">
+          {`createSrpcRouter({
+  services,
+  logger: true,
+  docs: { contractDir: "./contract" },
+  playground: { contractDir: "./contract" },
+});`}
+        </CodeBlock>
       </DocsSection>
 
       <DocsSection title="Service aggregation">
@@ -87,7 +101,7 @@ export default [
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Accept"
+    "Content-Type, Authorization, Accept, X-SRPC-API-KEY"
   );
 
   if (req.method === "OPTIONS") {
@@ -100,6 +114,46 @@ export default [
 
 app.use(createSrpcRouter({ services, logger: true, docs: { contractDir: "./contract" } }));`}
         </CodeBlock>
+      </DocsSection>
+
+      <DocsSection title="DevTools authentication">
+        <p>
+          Protect <code>/docs</code>, <code>/playground</code>, and{" "}
+          <code>/api/contracts</code> with a shared API key and/or HTTP Basic
+          auth. RPC traffic on <code>/srpc</code> is not affected. Full guide:{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>
+          .
+        </p>
+        <CodeBlock title="index.ts" language="typescript">
+          {`import {
+  createDevToolsAuth,
+  createSrpcRouter,
+  readDevToolsAuthFromEnv,
+} from "srpc-core/rpc";
+
+const auth = readDevToolsAuthFromEnv();
+// or: createDevToolsAuth({ apiKey: "...", username: "admin", password: "..." })
+
+app.use(
+  createSrpcRouter({
+    services,
+    auth,
+    docs: { contractDir: "./contract" },
+    playground: { contractDir: "./contract" },
+  })
+);`}
+        </CodeBlock>
+        <DocsList
+          items={[
+            "createDevToolsAuth() — build one shared auth object",
+            "readDevToolsAuthFromEnv() — read SRPC_API_KEY, SRPC_DOCS_USER, etc.",
+            "Authorization: Bearer <key> — CLI and curl",
+            "X-SRPC-API-KEY: <key> — alternative API key header",
+            "Authorization: Basic … — browser login for /docs and /playground",
+          ]}
+        />
       </DocsSection>
 
       <DocsSection title="JSON body parsing">

@@ -1,0 +1,5 @@
+package billing
+
+struct Invoice {
+    id: string
+}

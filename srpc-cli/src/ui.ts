@@ -112,7 +112,10 @@ export function printUsage(): void {
   console.log("");
   console.log(c.bold("Environment"));
   console.log(`  ${c.cyan("SRPC_URL")}             ${c.dim("Default server URL")} ${c.dim("(http://localhost:3100)")}`);
-  console.log(`  ${c.cyan("SRPC_API_KEY")}         ${c.dim("API key for write operations")}`);
+  console.log(`  ${c.cyan("SRPC_API_KEY")}         ${c.dim("Bearer token or API key")}`);
+  console.log(`  ${c.cyan("SRPC_TOKEN")}           ${c.dim("Alias for SRPC_API_KEY")}`);
+  console.log(`  ${c.cyan("SRPC_USER")}            ${c.dim("HTTP Basic username")}`);
+  console.log(`  ${c.cyan("SRPC_PASSWORD")}        ${c.dim("HTTP Basic password")}`);
   console.log(`  ${c.cyan("SRPC_CONTRACT_DIR")}    ${c.dim("Default local contract directory")} ${c.dim("(contract)")}`);
   console.log(`  ${c.cyan("NO_COLOR")}             ${c.dim("Disable ANSI colors")}`);
   console.log("");

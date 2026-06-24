@@ -11,11 +11,14 @@ export function hasFlag(args: string[], flag: string): boolean {
   return args.includes(flag);
 }
 
-const CLIENT_FLAGS = new Set(["--url", "--api-key"]);
+const CLIENT_FLAGS = new Set(["--url", "--api-key", "--token", "--user", "--password"]);
 
 const COMMAND_FLAGS = new Set([
   "--url",
   "--api-key",
+  "--token",
+  "--user",
+  "--password",
   "--dir",
   "--file",
   "--out",

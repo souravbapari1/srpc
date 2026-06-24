@@ -27,11 +27,20 @@ export {
   type SrpcHandlerContext,
 } from "./context.ts";
 
+export {
+  createDevToolsAuth,
+  createSrpcDevToolsAuth,
+  mergeDevToolsAuth,
+  readApiKey,
+  readDevToolsAuthFromEnv,
+  type CreateDevToolsAuthInput,
+  type SrpcDevToolsAuthOptions,
+} from "./devtools-auth.ts";
+
 export { createSrpcRouter, createSrpcServer } from "./server.ts";
 export type {
   CreateSrpcServerOptions,
   SrpcDocsServerOptions,
-  SrpcContractsApiOptions,
   SrpcPlaygroundOptions,
 } from "./server.ts";
 

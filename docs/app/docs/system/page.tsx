@@ -21,11 +21,20 @@ export default function SystemDocsPage() {
         <DocsList
           items={[
             "Contract docs (/docs) — human-readable HTML for browsing packages, types, and services, plus JSON for agents and tools",
+            "Playground (/playground) — browser UI to test /srpc calls against your contracts",
             "Contract API (/api/contracts) — read/write HTTP API for listing, validating, and syncing contract packages",
           ]}
         />
         <p>
-          Both are generated from the same contract directory. They do not execute
+          All three can be protected with a shared API key and HTTP Basic auth.
+          See{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>{" "}
+          for setup and usage.
+        </p>
+        <p>
+          These surfaces are generated from the same contract directory. They do not execute
           RPC handlers — they describe and manage the contract layer only. RPC
           traffic still goes through{" "}
           <Link href="/docs/protocol" className="text-accent-bright hover:underline">
@@ -36,17 +45,31 @@ export default function SystemDocsPage() {
       </DocsSection>
 
       <DocsSection title="Enable on the server">
+        <p>
+          Pass <code>docs</code> and <code>playground</code> to{" "}
+          <code>createSrpcRouter()</code>. Use <code>createDevToolsAuth()</code>{" "}
+          once for shared auth — see{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>{" "}
+          for the full guide.
+        </p>
         <CodeBlock title="index.ts" language="typescript">
-          {`app.use(
+          {`import { createDevToolsAuth, createSrpcRouter } from "srpc-core/rpc";
+
+const auth = createDevToolsAuth({
+  apiKey: "1234567890",
+  username: "admin",
+  password: "password",
+});
+
+app.use(
   createSrpcRouter({
     services,
     logger: true,
-    docs: {
-      contractDir: "./contract",
-      // optional overrides:
-      // path: "/docs",
-      // contractsApi: { apiKey: process.env.SRPC_API_KEY },
-    },
+    auth,
+    docs: { contractDir: "./contract" },
+    playground: { contractDir: "./contract" },
   })
 );`}
         </CodeBlock>
@@ -55,15 +78,43 @@ export default function SystemDocsPage() {
             "docs: true — scan ./contract from the working directory",
             "docs.contractDir — custom folder of .ctr / .rpc files",
             "docs.path — change docs base path (default /docs)",
+            "playground — enable /playground request tester (default path /playground)",
+            "auth — shared API key + Basic auth for /docs, /playground, /api/contracts",
             "docs.contractsApi: false — docs only, no /api/contracts",
-            "docs.contractsApi.path — change API base path (default /api/contracts)",
-            "docs.contractsApi.apiKey — require Bearer token on POST, PUT, DELETE",
+            "docs.contractsApiPath — change API base path (default /api/contracts)",
           ]}
         />
         <p>
           When handlers are registered, service pages annotate methods with{" "}
           <code>implemented</code> so you can see which contract methods have
           backing code.
+        </p>
+      </DocsSection>
+
+      <DocsSection title="Playground">
+        <p>
+          The playground is a browser-based request tester. It loads your contract
+          metadata, prefills SRPC envelopes, and calls <code>/srpc</code>.
+        </p>
+        <DocsList
+          items={[
+            "GET /playground — interactive HTML UI",
+            "GET /playground?format=json — bootstrap JSON (packages, services, rpc path)",
+          ]}
+        />
+        <CodeBlock title="examples">
+          {`open http://localhost:3100/playground
+
+# When auth is enabled, the browser prompts for Basic credentials
+# or send: curl -u admin:password http://localhost:3100/playground`}
+        </CodeBlock>
+        <p>
+          Use the Headers tab in the playground to add <code>Authorization</code>{" "}
+          or custom headers for test requests. Auth setup:{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>
+          .
         </p>
       </DocsSection>
 
@@ -92,7 +143,7 @@ open http://localhost:3100/docs
 open http://localhost:3100/docs/user/UserService
 open http://localhost:3100/docs/visualizer
 
-# JSON for agents / CI
+# JSON for agents / CI (add -H "Authorization: Bearer $SRPC_API_KEY" when auth is on)
 curl -s 'http://localhost:3100/docs?format=json'
 curl -s 'http://localhost:3100/docs/user?format=json'
 curl -s 'http://localhost:3100/docs/user/UserService?format=json'
@@ -102,8 +153,9 @@ curl -s 'http://localhost:3100/docs/visualizer?format=json'`}
 
       <DocsSection title="Contract API routes">
         <p>
-          The contract API manages <code>.ctr</code> files on disk. Reads are open
-          by default; writes can be protected with an API key.
+          The contract API manages <code>.ctr</code> files on disk. When{" "}
+          <code>auth</code> is configured on the server, all contract API routes
+          require a valid API key or HTTP Basic credentials.
         </p>
         <DocsList
           items={[
@@ -117,7 +169,12 @@ curl -s 'http://localhost:3100/docs/visualizer?format=json'`}
           ]}
         />
         <CodeBlock title="validate without saving">
-          {`curl -s -X POST http://localhost:3100/api/contracts/validate \\
+          {`# Add auth headers when the server requires them:
+#   -H "Authorization: Bearer $SRPC_API_KEY"
+#   -H "X-SRPC-API-KEY: $SRPC_API_KEY"
+#   -u admin:password
+
+curl -s -X POST http://localhost:3100/api/contracts/validate \\
   -H 'Content-Type: application/json' \\
   -d '{
     "package": "user",
@@ -128,7 +185,11 @@ curl -s 'http://localhost:3100/docs/visualizer?format=json'`}
           {`curl -s -X PUT http://localhost:3100/api/contracts/user \\
   -H 'Content-Type: application/json' \\
   -H "Authorization: Bearer $SRPC_API_KEY" \\
-  -d '{ "source": "package user\\n..." }'`}
+  -d '{ "source": "package user\\n..." }'
+
+# Or send the key in a dedicated header:
+curl -s http://localhost:3100/api/contracts \\
+  -H "X-SRPC-API-KEY: $SRPC_API_KEY"`}
         </CodeBlock>
         <p>
           Error responses use a consistent JSON shape:{" "}
@@ -172,8 +233,9 @@ srpc package validate user`}
 bun run generate`}
         </CodeBlock>
         <p>
-          <strong>Contract owner</strong> — protect writes with{" "}
-          <code>SRPC_API_KEY</code>, push changes from CI or a maintainer machine.
+          <strong>Contract owner</strong> — protect devtools with{" "}
+          <code>SRPC_API_KEY</code> and/or HTTP Basic auth, then push changes
+          from CI or a maintainer machine.
         </p>
         <CodeBlock title="terminal">
           {`SRPC_API_KEY=secret SRPC_URL=https://api.example.com \\
@@ -203,6 +265,7 @@ bun run generate`}
       "args": ["\${workspaceFolder}/srpc-mcp/index.ts"],
       "env": {
         "SRPC_URL": "http://localhost:3100",
+        "SRPC_API_KEY": "your-secret",
         "SRPC_CONTRACT_DIR": "\${workspaceFolder}/example/contract"
       }
     }
@@ -233,6 +296,7 @@ bun run generate`}
             "srpc-mcp — MCP tools for agents to read contracts and docs",
             "srpc-cli — codegen + package pull/push/validate via /api/contracts",
             "/docs — browse and share API surface with humans and agents",
+            "/playground — test /srpc calls in the browser",
             "/api/contracts — programmatic contract storage and validation",
             "/srpc — execute implemented service methods at runtime",
           ]}

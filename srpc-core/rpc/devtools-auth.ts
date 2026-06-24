@@ -10,6 +10,49 @@ export interface SrpcDevToolsAuthOptions {
   };
 }
 
+export interface CreateDevToolsAuthInput {
+  apiKey?: string;
+  basicAuth?: {
+    username: string;
+    password: string;
+  };
+  /** Shorthand for `basicAuth.username`. */
+  username?: string;
+  /** Shorthand for `basicAuth.password`. */
+  password?: string;
+}
+
+/** Build one auth config shared by /docs, /playground, and /api/contracts. */
+export function createDevToolsAuth(
+  input: CreateDevToolsAuthInput | undefined
+): SrpcDevToolsAuthOptions | undefined {
+  if (!input) {
+    return undefined;
+  }
+
+  const basicAuth =
+    input.basicAuth ??
+    (input.username && input.password
+      ? { username: input.username, password: input.password }
+      : undefined);
+
+  return mergeDevToolsAuth({
+    apiKey: input.apiKey,
+    basicAuth,
+  });
+}
+
+/** Read shared devtools auth from common environment variables. */
+export function readDevToolsAuthFromEnv(
+  env: Record<string, string | undefined> = process.env
+): SrpcDevToolsAuthOptions | undefined {
+  return createDevToolsAuth({
+    apiKey: env.SRPC_API_KEY ?? env.SRPC_TOKEN,
+    username: env.SRPC_DOCS_USER ?? env.SRPC_USER,
+    password: env.SRPC_DOCS_PASSWORD ?? env.SRPC_PASSWORD,
+  });
+}
+
 export function mergeDevToolsAuth(
   ...sources: Array<SrpcDevToolsAuthOptions | undefined>
 ): SrpcDevToolsAuthOptions | undefined {

@@ -43,12 +43,17 @@ export const docNav: DocNavItem[] = [
   {
     title: "Building the server",
     href: "/docs/server",
-    description: "Express router, docs, contract API, CORS, and logging",
+    description: "Express router, docs, playground, CORS, and logging",
+  },
+  {
+    title: "DevTools authentication",
+    href: "/docs/auth",
+    description: "Protect /docs, /playground, and /api/contracts",
   },
   {
     title: "System docs & APIs",
     href: "/docs/system",
-    description: "Contract docs, internal API routes, MCP tools, and use cases",
+    description: "Contract docs, playground, contract API, MCP, and use cases",
   },
   {
     title: "Implementing handlers",

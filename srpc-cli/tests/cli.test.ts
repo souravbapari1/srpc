@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, test } from "bun:test";
 import express from "express";
-import { createContractsApiRouter } from "srpc-core/rpc";
+import { createContractsApiRouter, createSrpcDevToolsAuth } from "srpc-core/rpc";
 import { hasFlag, positionalArgs, readFlag, stripClientFlags } from "../src/args.ts";
 import {
   listLocalPackages,
@@ -58,7 +58,10 @@ async function withApiServer(
   apiKey?: string
 ): Promise<void> {
   const app = express();
-  app.use("/api/contracts", createContractsApiRouter({ contractDir, apiKey }));
+  if (apiKey) {
+    app.use("/api/contracts", createSrpcDevToolsAuth({ apiKey })!);
+  }
+  app.use("/api/contracts", createContractsApiRouter({ contractDir }));
 
   const server = await new Promise<ReturnType<typeof app.listen>>((resolve, reject) => {
     const listener = app.listen(0, "127.0.0.1", () => resolve(listener));
@@ -324,7 +327,7 @@ struct EmptyResponse {
           contractDir,
         ]);
         expect(denied.exitCode).toBe(1);
-        expect(denied.stderr).toContain("Invalid or missing API key");
+        expect(denied.stderr).toContain("Invalid or missing credentials");
 
         const allowed = await runCli(
           [

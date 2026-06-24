@@ -30,6 +30,12 @@ import {
   createConsoleSrpcLogger,
   type SrpcLogger,
 } from "./logger.ts";
+import {
+  createSrpcDevToolsAuth,
+  type SrpcDevToolsAuthOptions,
+} from "./devtools-auth.ts";
+
+export type { SrpcDevToolsAuthOptions };
 
 export interface SrpcDocsServerOptions {
   /** Directory with `.ctr` / `.rpc` contract files. */
@@ -37,14 +43,9 @@ export interface SrpcDocsServerOptions {
   /** Docs base path. Defaults to `/docs`. */
   path?: string;
   /** Enable contract read/write API. Defaults to `true` when docs are enabled. */
-  contractsApi?: boolean | SrpcContractsApiOptions;
-}
-
-export interface SrpcContractsApiOptions {
-  /** API base path. Defaults to `/api/contracts`. */
-  path?: string;
-  /** Require this key for write operations. */
-  apiKey?: string;
+  contractsApi?: boolean;
+  /** Contract API base path. Defaults to `/api/contracts`. */
+  contractsApiPath?: string;
 }
 
 export interface SrpcPlaygroundOptions {
@@ -62,6 +63,11 @@ export interface CreateSrpcServerOptions {
   httpMethods?: HttpMethodRegistry;
   /** Log incoming RPC requests and responses to the console when `true`. */
   logger?: SrpcLogger | boolean;
+  /**
+   * Protect `/docs`, `/playground`, and `/api/contracts` with API key and/or
+   * HTTP Basic auth.
+   */
+  auth?: SrpcDevToolsAuthOptions;
   /** Serve contract docs at `/docs` (or custom path). */
   docs?: boolean | SrpcDocsServerOptions;
   /** Serve a built-in browser request tester at `/playground` (or custom path). */
@@ -80,21 +86,28 @@ function resolveContractsApiOptions(
     return undefined;
   }
 
-  const contractsApi =
-    typeof docs === "object" && docs.contractsApi && typeof docs.contractsApi === "object"
-      ? docs.contractsApi
-      : undefined;
+  return { contractDir };
+}
 
-  return {
-    contractDir,
-    apiKey: contractsApi?.apiKey,
-  };
+function mountWithAuth(
+  router: Router,
+  path: string,
+  auth: SrpcDevToolsAuthOptions | undefined,
+  handler: Router
+): void {
+  const guard = createSrpcDevToolsAuth(auth);
+  if (guard) {
+    router.use(path, guard);
+  }
+
+  router.use(path, handler);
 }
 
 function mountContractsApiRouter(
   router: Router,
   docs: boolean | SrpcDocsServerOptions | undefined,
-  contractDir: string
+  contractDir: string,
+  serverAuth: SrpcDevToolsAuthOptions | undefined
 ): void {
   const options = resolveContractsApiOptions(docs, contractDir);
   if (!options) {
@@ -102,14 +115,16 @@ function mountContractsApiRouter(
   }
 
   const apiPath =
-    typeof docs === "object" &&
-    docs.contractsApi &&
-    typeof docs.contractsApi === "object" &&
-    docs.contractsApi.path
-      ? docs.contractsApi.path
+    typeof docs === "object" && docs.contractsApiPath
+      ? docs.contractsApiPath
       : SRPC_CONTRACTS_API_PATH;
 
-  router.use(apiPath, createContractsApiRouter(options));
+  mountWithAuth(
+    router,
+    apiPath,
+    serverAuth,
+    createContractsApiRouter(options)
+  );
 }
 
 function resolveLogger(
@@ -167,7 +182,8 @@ function resolveDocsOptions(
 function mountDocsRouter(
   router: Router,
   docs: boolean | SrpcDocsServerOptions | undefined,
-  services: DefinedService[] | ServiceRegistry
+  services: DefinedService[] | ServiceRegistry,
+  serverAuth: SrpcDevToolsAuthOptions | undefined
 ): void {
   const docsOptions = resolveDocsOptions(docs, services);
   if (!docsOptions) {
@@ -177,7 +193,12 @@ function mountDocsRouter(
   const docsPath =
     typeof docs === "object" && docs.path ? docs.path : SRPC_DOCS_PATH;
 
-  router.use(docsPath, createSrpcDocsRouter(docsOptions));
+  mountWithAuth(
+    router,
+    docsPath,
+    serverAuth,
+    createSrpcDocsRouter(docsOptions)
+  );
 }
 
 function resolvePlaygroundOptions(
@@ -198,7 +219,8 @@ function resolvePlaygroundOptions(
 function mountPlaygroundRouter(
   router: Router,
   playground: boolean | SrpcPlaygroundOptions | undefined,
-  rpcPath: string
+  rpcPath: string,
+  serverAuth: SrpcDevToolsAuthOptions | undefined
 ): void {
   const playgroundOptions = resolvePlaygroundOptions(playground, rpcPath);
   if (!playgroundOptions) {
@@ -210,7 +232,12 @@ function mountPlaygroundRouter(
       ? playground.path
       : SRPC_PLAYGROUND_PATH;
 
-  router.use(playgroundPath, createSrpcPlaygroundRouter(playgroundOptions));
+  mountWithAuth(
+    router,
+    playgroundPath,
+    serverAuth,
+    createSrpcPlaygroundRouter(playgroundOptions)
+  );
 }
 
 export function createSrpcRouter(options: CreateSrpcServerOptions): Router {
@@ -224,8 +251,8 @@ export function createSrpcRouter(options: CreateSrpcServerOptions): Router {
   router.patch(path, express.json(), handler);
   router.delete(path, handler);
 
-  mountDocsRouter(router, options.docs, options.services);
-  mountPlaygroundRouter(router, options.playground, path);
+  mountDocsRouter(router, options.docs, options.services, options.auth);
+  mountPlaygroundRouter(router, options.playground, path, options.auth);
 
   const contractDir =
     typeof options.docs === "object"
@@ -235,7 +262,7 @@ export function createSrpcRouter(options: CreateSrpcServerOptions): Router {
         : undefined;
 
   if (contractDir) {
-    mountContractsApiRouter(router, options.docs, contractDir);
+    mountContractsApiRouter(router, options.docs, contractDir, options.auth);
   }
 
   return router;

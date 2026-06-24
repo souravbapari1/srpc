@@ -9,8 +9,6 @@ export const SRPC_CONTRACTS_API_PATH = "/api/contracts";
 
 export interface CreateContractsApiOptions {
   contractDir: string;
-  /** Require this key for write operations (POST, PUT, DELETE). */
-  apiKey?: string;
 }
 
 export function createContractsApiRouter(
@@ -82,7 +80,7 @@ export function createContractsApiRouter(
     });
   });
 
-  router.post("/", express.json(), requireWriteAccess(options.apiKey), (req, res) => {
+  router.post("/", express.json(), (req, res) => {
     const packageName = readString(req.body?.package);
     const source = readString(req.body?.source);
     if (!packageName || !source) {
@@ -102,7 +100,7 @@ export function createContractsApiRouter(
     }
   });
 
-  router.put("/:package", express.json(), requireWriteAccess(options.apiKey), (req, res) => {
+  router.put("/:package", express.json(), (req, res) => {
     const packageName = readParam(req.params.package);
     if (!packageName) {
       sendError(res, 400, "invalid_request", "Missing package");
@@ -123,7 +121,7 @@ export function createContractsApiRouter(
     }
   });
 
-  router.delete("/:package", requireWriteAccess(options.apiKey), (req, res) => {
+  router.delete("/:package", (req, res) => {
     const packageName = readParam(req.params.package);
     if (!packageName) {
       sendError(res, 400, "invalid_request", "Missing package");
@@ -145,32 +143,6 @@ export function createContractsApiStore(
   options: CreateContractsApiOptions
 ): ContractStore {
   return createContractStore({ contractDir: options.contractDir });
-}
-
-function requireWriteAccess(apiKey?: string) {
-  return (req: Request, res: Response, next: () => void): void => {
-    if (!apiKey) {
-      next();
-      return;
-    }
-
-    const provided = readApiKey(req);
-    if (!provided || provided !== apiKey) {
-      sendError(res, 401, "unauthorized", "Invalid or missing API key");
-      return;
-    }
-
-    next();
-  };
-}
-
-function readApiKey(req: Request): string | undefined {
-  const header = req.get("authorization");
-  if (header?.startsWith("Bearer ")) {
-    return header.slice("Bearer ".length).trim();
-  }
-
-  return req.get("x-srpc-api-key") ?? undefined;
 }
 
 function readString(value: unknown): string | undefined {

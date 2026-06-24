@@ -5,6 +5,7 @@ import { afterEach, expect, test } from "bun:test";
 import express from "express";
 import { createContractStore } from "../src/contract-store.ts";
 import { createContractsApiRouter } from "../rpc/contracts-router.ts";
+import { createSrpcDevToolsAuth } from "../rpc/devtools-auth.ts";
 
 const tempDirs: string[] = [];
 
@@ -195,7 +196,8 @@ struct EmptyResponse {
   const app = express();
   app.use(
     "/api/contracts",
-    createContractsApiRouter({ contractDir: dir, apiKey: "secret-key" })
+    createSrpcDevToolsAuth({ apiKey: "secret-key" })!,
+    createContractsApiRouter({ contractDir: dir })
   );
 
   await withServer(app, async baseUrl => {

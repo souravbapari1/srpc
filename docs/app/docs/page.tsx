@@ -101,7 +101,8 @@ bun run dev`}
         </CodeBlock>
         <p>
           The server listens on <strong>http://localhost:3100</strong> with RPC at{" "}
-          <code>/srpc</code>, docs at <code>/docs</code>, and the contract API at{" "}
+          <code>/srpc</code>, docs at <code>/docs</code>, playground at{" "}
+          <code>/playground</code>, and the contract API at{" "}
           <code>/api/contracts</code>.
         </p>
       </DocsSection>
@@ -112,6 +113,7 @@ bun run dev`}
             "Install everything → Full setup guide",
             "Contract file format → Writing contracts",
             "Browse docs & internal APIs → System docs & APIs",
+            "Protect docs, playground & API → DevTools authentication",
             "Remote package sync → Contract CLI",
             "Editor tooling → VS Code extension",
             "Wire up handlers → Implementing handlers",

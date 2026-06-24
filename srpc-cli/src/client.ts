@@ -3,6 +3,10 @@ import type { ContractDocsIndex } from "srpc-core";
 export interface ContractsClientOptions {
   baseUrl: string;
   apiKey?: string;
+  basicAuth?: {
+    username: string;
+    password: string;
+  };
 }
 
 export interface ContractListResponse {
@@ -56,6 +60,11 @@ export function createContractsClient(options: ContractsClientOptions) {
 
     if (options.apiKey) {
       headers.Authorization = `Bearer ${options.apiKey}`;
+    } else if (options.basicAuth) {
+      const encoded = Buffer.from(
+        `${options.basicAuth.username}:${options.basicAuth.password}`
+      ).toString("base64");
+      headers.Authorization = `Basic ${encoded}`;
     }
 
     const response = await fetch(`${baseUrl}${path}`, {

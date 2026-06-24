@@ -42,10 +42,20 @@ function parseClientOptions(args: string[]): {
     process.env.SRPC_URL ??
     "http://localhost:3100";
 
-  const apiKey = readFlag(args, "--api-key") ?? process.env.SRPC_API_KEY;
+  const apiKey =
+    readFlag(args, "--api-key") ??
+    readFlag(args, "--token") ??
+    process.env.SRPC_API_KEY ??
+    process.env.SRPC_TOKEN;
+
+  const username = readFlag(args, "--user") ?? process.env.SRPC_USER;
+  const password = readFlag(args, "--password") ?? process.env.SRPC_PASSWORD;
+
+  const basicAuth =
+    username && password ? { username, password } : undefined;
 
   return {
-    options: { baseUrl, apiKey },
+    options: { baseUrl, apiKey, basicAuth },
     rest: stripClientFlags(args),
   };
 }

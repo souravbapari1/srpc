@@ -1,10 +1,34 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "bun:test";
+import { afterEach, test, expect } from "bun:test";
 import express from "express";
 import { createContractsApiRouter } from "../rpc/contracts-router.ts";
-import { createSrpcDevToolsAuth } from "../rpc/devtools-auth.ts";
+import {
+  createDevToolsAuth,
+  createSrpcDevToolsAuth,
+} from "../rpc/devtools-auth.ts";
+import { createSrpcRouter } from "../rpc/server.ts";
 
 const contractDir = join(import.meta.dir, "../../example/contract");
+const tempDirs: string[] = [];
+
+function makeTempContractDir(files: Record<string, string>): string {
+  const dir = mkdtempSync(join(tmpdir(), "srpc-devtools-auth-"));
+  tempDirs.push(dir);
+
+  for (const [file, source] of Object.entries(files)) {
+    writeFileSync(join(dir, file), source, "utf8");
+  }
+
+  return dir;
+}
+
+afterEach(() => {
+  while (tempDirs.length > 0) {
+    rmSync(tempDirs.pop()!, { recursive: true, force: true });
+  }
+});
 
 async function withServer(
   app: express.Express,
@@ -23,6 +47,19 @@ async function withServer(
     server.close();
   }
 }
+
+test("createDevToolsAuth builds shared api key and basic auth", () => {
+  expect(
+    createDevToolsAuth({
+      apiKey: "1234567890",
+      username: "admin",
+      password: "password",
+    })
+  ).toEqual({
+    apiKey: "1234567890",
+    basicAuth: { username: "admin", password: "password" },
+  });
+});
 
 test("devtools auth accepts bearer api key", async () => {
   const app = express();
@@ -72,10 +109,20 @@ test("devtools auth accepts basic auth", async () => {
 });
 
 test("contracts API requires api key for reads and writes when configured", async () => {
+  const dir = makeTempContractDir({
+    "common.ctr": `package common
+
+struct EmptyResponse {
+    ok: boolean
+}
+`,
+  });
+
   const app = express();
   app.use(
     "/api/contracts",
-    createContractsApiRouter({ contractDir, apiKey: "secret-key" })
+    createSrpcDevToolsAuth({ apiKey: "secret-key" })!,
+    createContractsApiRouter({ contractDir: dir })
   );
 
   await withServer(app, async baseUrl => {
@@ -114,5 +161,33 @@ struct Invoice {
       }),
     });
     expect(allowed.status).toBe(201);
+  });
+});
+
+test("createSrpcRouter protects docs, playground, and contracts API when auth is set", async () => {
+  const app = express();
+  app.use(
+    createSrpcRouter({
+      services: [],
+      auth: createDevToolsAuth({
+        apiKey: "secret-key",
+        username: "admin",
+        password: "password",
+      }),
+      docs: { contractDir },
+      playground: { contractDir },
+    })
+  );
+
+  await withServer(app, async baseUrl => {
+    for (const path of ["/docs", "/playground", "/api/contracts"]) {
+      const denied = await fetch(`${baseUrl}${path}`);
+      expect(denied.status).toBe(401);
+
+      const allowed = await fetch(`${baseUrl}${path}`, {
+        headers: { Authorization: "Bearer secret-key" },
+      });
+      expect(allowed.status).not.toBe(401);
+    }
   });
 });

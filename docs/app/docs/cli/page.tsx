@@ -33,20 +33,53 @@ export default function CliPage() {
         </p>
       </DocsSection>
 
+      <DocsSection title="Authentication">
+        <p>
+          When the server has devtools auth enabled, all <code>package</code>{" "}
+          commands send credentials from env vars or flags. See{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>{" "}
+          for server setup.
+        </p>
+        <CodeBlock title="terminal">
+          {`# API key (Bearer token)
+export SRPC_API_KEY=your-secret
+srpc package list
+srpc package push
+
+# Or via flags
+srpc package pull --api-key your-secret
+srpc package push --token your-secret    # --token alias
+
+# HTTP Basic
+srpc package list --user admin --password secret
+export SRPC_USER=admin SRPC_PASSWORD=secret
+srpc package validate user`}
+        </CodeBlock>
+      </DocsSection>
+
       <DocsSection title="Environment">
         <DocsList
           items={[
             "SRPC_URL — contract API base URL (default http://localhost:3100)",
             "SRPC_CONTRACT_DIR — default local contract folder (contract)",
-            "SRPC_API_KEY — Bearer token when the server requires it for writes",
+            "SRPC_API_KEY / SRPC_TOKEN — Bearer token when the server requires auth",
+            "SRPC_USER / SRPC_PASSWORD — HTTP Basic credentials",
             "NO_COLOR — disable ANSI colors in terminal output",
           ]}
         />
         <CodeBlock title=".env">
           {`SRPC_URL=http://localhost:3100
 SRPC_CONTRACT_DIR=./contract
-# SRPC_API_KEY=secret`}
+# SRPC_API_KEY=secret
+# SRPC_USER=admin
+# SRPC_PASSWORD=secret`}
         </CodeBlock>
+        <p>
+          Flags: <code>--url</code>, <code>--api-key</code> / <code>--token</code>,{" "}
+          <code>--user</code>, <code>--password</code>.
+        </p>
       </DocsSection>
 
       <DocsSection title="Codegen">

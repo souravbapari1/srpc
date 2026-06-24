@@ -21,6 +21,7 @@ Current docs sections include:
 - Codegen
 - Contract CLI
 - Building the server
+- DevTools authentication
 - System docs & APIs
 - Implementing handlers
 - Protocol & errors

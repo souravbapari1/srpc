@@ -53,10 +53,18 @@ bun run dev`}
           items={[
             "RPC endpoint — http://localhost:3100/srpc",
             "Contract docs — http://localhost:3100/docs (HTML + JSON via ?format=json)",
+            "Playground — http://localhost:3100/playground (browser request tester)",
             "Contract API — http://localhost:3100/api/contracts (read/write packages)",
             "Visualizer — http://localhost:3100/docs/visualizer",
           ]}
         />
+        <p>
+          Optional auth protects docs, playground, and the contract API. See{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>
+          .
+        </p>
       </DocsSection>
 
       <DocsSection title="New project from scratch">
@@ -117,15 +125,27 @@ bun run dev`}
           <code>docs</code> to <code>createSrpcRouter()</code>:
         </p>
         <CodeBlock title="index.ts" language="typescript">
-          {`app.use(
+          {`import {
+  createDevToolsAuth,
+  createSrpcRouter,
+  readDevToolsAuthFromEnv,
+} from "srpc-core/rpc";
+
+const auth = readDevToolsAuthFromEnv();
+// or:
+// const auth = createDevToolsAuth({
+//   apiKey: "1234567890",
+//   username: "admin",
+//   password: "password",
+// });
+
+app.use(
   createSrpcRouter({
     services,
     logger: true,
-    docs: {
-      contractDir: "./contract",
-      // Optional: protect writes to /api/contracts
-      // contractsApi: { apiKey: process.env.SRPC_API_KEY },
-    },
+    auth,
+    docs: { contractDir: "./contract" },
+    playground: { contractDir: "./contract" },
   })
 );`}
         </CodeBlock>
@@ -134,7 +154,11 @@ bun run dev`}
           <Link href="/docs/system" className="text-accent-bright hover:underline">
             System docs & APIs
           </Link>{" "}
-          for all routes and use cases, and{" "}
+          for all routes and use cases,{" "}
+          <Link href="/docs/auth" className="text-accent-bright hover:underline">
+            DevTools authentication
+          </Link>{" "}
+          for protecting docs/playground/API, and{" "}
           <Link href="/docs/server" className="text-accent-bright hover:underline">
             Building the server
           </Link>{" "}
@@ -203,11 +227,15 @@ bunx @vscode/vsce package --allow-missing-repository
         <CodeBlock title=".env">
           {`# Server
 PORT=3100
-SRPC_API_KEY=your-secret          # optional — required for contract API writes
+SRPC_API_KEY=your-secret              # optional — protects /docs, /playground, /api/contracts
+SRPC_DOCS_USER=admin                  # optional — HTTP Basic for browser devtools
+SRPC_DOCS_PASSWORD=secret
 
 # CLI (example app)
 SRPC_URL=http://localhost:3100
-SRPC_CONTRACT_DIR=./contract`}
+SRPC_CONTRACT_DIR=./contract
+SRPC_USER=admin                       # optional — HTTP Basic for CLI
+SRPC_PASSWORD=secret`}
         </CodeBlock>
       </DocsSection>
 
