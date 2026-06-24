@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SRPC Docs
 
-## Getting Started
+This app is the documentation site for the SRPC framework. It covers the full SRPC workflow: writing `.ctr` contracts, generating TypeScript, implementing handlers with `defineService()`, mounting the Express router, using `srpc-cli`, browsing system docs and contract APIs, and working with the VS Code extension.
 
-First, run the development server:
+Built with Next.js App Router.
+
+## What lives here
+
+- Marketing-style homepage in `app/page.tsx`
+- Documentation pages under `app/docs/*`
+- Shared docs navigation in `lib/docs-nav.ts`
+- Reusable UI components in `components/*`
+
+Current docs sections include:
+
+- Introduction
+- Full setup guide
+- Writing contracts
+- Types reference
+- Defining services
+- Codegen
+- Contract CLI
+- Building the server
+- System docs & APIs
+- Implementing handlers
+- Protocol & errors
+- VS Code extension
+
+## Local development
+
+From `docs/`:
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+Useful scripts:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Writing docs
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Most docs pages are simple React/TSX files under `app/docs/`. Common building blocks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `DocsPage`, `DocsSection`, `DocsList` from `components/docs-page.tsx`
+- `CodeBlock` for inline examples
+- `FlowSteps` for multi-step walkthroughs
 
-## Learn More
+When adding a new page:
 
-To learn more about Next.js, take a look at the following resources:
+1. Create `app/docs/<slug>/page.tsx`
+2. Add the page to `lib/docs-nav.ts`
+3. Link it from nearby docs where useful
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+docs/
+├── app/
+│   ├── page.tsx              # homepage
+│   └── docs/                 # framework docs pages
+├── components/               # shared docs UI
+├── lib/                      # navigation + helpers
+├── public/                   # static assets
+├── package.json
+└── README.md
+```
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The site documents the SRPC monorepo, especially `srpc-core`, `srpc-cli`, `srpc-mcp`, the example app, and the VS Code extension.
+- If framework behavior changes, update the relevant page in `app/docs/*` and keep `lib/docs-nav.ts` in sync.
