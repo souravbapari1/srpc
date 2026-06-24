@@ -157,6 +157,8 @@ test("rejects wrong HTTP method for decorated service method", async () => {
 
   if ("error" in response) {
     expect(response.error.code).toBe(SrpcErrorCode.METHOD_NOT_ALLOWED);
+    expect(response.error.message).toBe("This request must use GET, not POST.");
+    expect(response.error.detail).toContain("must be called with HTTP GET");
   }
 });
 
@@ -202,4 +204,53 @@ test("passes request headers to service handler context", async () => {
       userAgent: "srpc-test",
     });
   }
+});
+
+test("logger records request and response", async () => {
+  const requests: unknown[] = [];
+  const responses: unknown[] = [];
+
+  await handleSrpcRequest(
+    {
+      srpc: "1.0",
+      id: "req-log",
+      service: servicePath("user", "UserService"),
+      method: "getUser",
+      params: { id: "1" },
+    },
+    {
+      services: {
+        [servicePath("user", "UserService")]: {
+          getUser: () => ({ id: "1", name: "Logged" }),
+        },
+      },
+      logger: {
+        request(entry) {
+          requests.push(entry);
+        },
+        response(entry) {
+          responses.push(entry);
+        },
+      },
+    },
+    { method: "GET" } as express.Request
+  );
+
+  expect(requests).toHaveLength(1);
+  expect(responses).toHaveLength(1);
+
+  expect(requests[0]).toMatchObject({
+    httpMethod: "GET",
+    service: "user.UserService",
+    method: "getUser",
+    id: "req-log",
+    params: { id: "1" },
+  });
+
+  expect(responses[0]).toMatchObject({
+    service: "user.UserService",
+    method: "getUser",
+    id: "req-log",
+    ok: true,
+  });
 });

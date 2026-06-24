@@ -9,39 +9,7 @@ import {
 
 let client: LanguageClient;
 
-const ICON_THEME_ID = "srpc-file-icons";
-
-async function enableFileIcons(): Promise<void> {
-  const enabled = workspace
-    .getConfiguration("srpc")
-    .get<boolean>("enableFileIcons", true);
-
-  if (!enabled) {
-    return;
-  }
-
-  const iconTheme = workspace
-    .getConfiguration("workbench")
-    .get<string>("iconTheme");
-
-  if (iconTheme === ICON_THEME_ID) {
-    return;
-  }
-
-  const isDefaultTheme =
-    !iconTheme || iconTheme === "vs-seti-vscode" || iconTheme === "vs-minimal";
-
-  if (!isDefaultTheme) {
-    return;
-  }
-
-  await workspace
-    .getConfiguration("workbench")
-    .update("iconTheme", ICON_THEME_ID, true);
-}
-
 export function activate(context: ExtensionContext) {
-  void enableFileIcons();
   const serverModule = context.asAbsolutePath(
     path.join("server", "out", "server.js")
   );

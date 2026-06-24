@@ -26,10 +26,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(createSrpcRouter({ services }));
+app.use(
+  createSrpcRouter({
+    services,
+    logger: true,
+    docs: { contractDir: "./contract" },
+  })
+);
 
 app.listen(PORT, async () => {
   console.log(`SRPC server listening on http://localhost:${PORT}`);
+  console.log(`Contract docs at http://localhost:${PORT}/docs`);
+  console.log(`Contract API at http://localhost:${PORT}/api/contracts`);
 
   const result = await user.getUser({ id: "user-1" });
   console.log("getUser:", JSON.stringify(result, null, 2));

@@ -50,21 +50,9 @@
         "editor.wordBasedSuggestions": "off"
       }
     },
-    "iconThemes": [
-      {
-        "id": "srpc-file-icons",
-        "label": "SRPC File Icons",
-        "path": "./icons/srpc-file-icon-theme.json"
-      }
-    ],
     "configuration": {
       "title": "SRPC",
       "properties": {
-        "srpc.enableFileIcons": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use the SRPC file icon for .ctr and .rpc files."
-        },
         "srpc.autoPackage": {
           "type": "boolean",
           "default": true,
@@ -77,7 +65,7 @@
     "compile": "node scripts/build.mjs",
     "typecheck": "tsc -b",
     "watch": "node scripts/build.mjs --watch",
-    "package": "bun run compile && bunx @vscode/vsce package --allow-missing-repository"
+    "package": "bun run compile && bunx @vscode/vsce package"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",

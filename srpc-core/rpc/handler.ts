@@ -9,10 +9,17 @@ import {
   isSrpcRequest,
   parseSrpcRequestFromQuery,
   SRPC_VERSION,
-  SrpcErrorCode,
   type SrpcRequest,
 } from "./protocol.ts";
+import {
+  internalError,
+  invalidRequestError,
+  methodNotAllowedError,
+  methodNotFoundError,
+  serviceNotFoundError,
+} from "./errors.ts";
 import type { SrpcHttpMethod } from "./service-meta.ts";
+import type { SrpcLogger } from "./logger.ts";
 
 export type ServiceMethodHandler = (
   params: unknown,
@@ -32,6 +39,7 @@ export type HttpMethodRegistry = Record<
 export interface HandleSrpcOptions {
   services: ServiceRegistry;
   httpMethods?: HttpMethodRegistry;
+  logger?: SrpcLogger;
 }
 
 export async function handleSrpcRequest(
@@ -39,28 +47,33 @@ export async function handleSrpcRequest(
   options: HandleSrpcOptions,
   request?: Request
 ): Promise<ReturnType<typeof buildSuccess> | ReturnType<typeof buildError>> {
+  const started = performance.now();
+  const httpMethod = request?.method ?? "?";
+
   if (!isSrpcRequest(body)) {
-    return buildError({
-      code: SrpcErrorCode.INVALID_REQUEST,
-      message: `Invalid SRPC request. Expected srpc=${SRPC_VERSION}, service, and method.`,
-    });
+    return buildError(
+      invalidRequestError(
+        `Invalid SRPC request. Expected srpc=${SRPC_VERSION}, service, and method.`
+      )
+    );
   }
+
+  logRequest(options.logger, httpMethod, body);
 
   const methodError = validateHttpMethod(body, options, request?.method);
 
-  if (methodError) {
-    return methodError;
-  }
+  const response = methodError
+    ? methodError
+    : !request
+      ? await dispatchRequest(body, options, createFallbackContext(body))
+      : await dispatchRequest(
+          body,
+          options,
+          createHandlerContext(request, body)
+        );
 
-  if (!request) {
-    return dispatchRequest(body, options, createFallbackContext(body));
-  }
-
-  return dispatchRequest(
-    body,
-    options,
-    createHandlerContext(request, body)
-  );
+  logResponse(options.logger, body, response, performance.now() - started);
+  return response;
 }
 
 export function createSrpcHttpHandler(options: HandleSrpcOptions) {
@@ -71,17 +84,52 @@ export function createSrpcHttpHandler(options: HandleSrpcOptions) {
       const status = "error" in response ? 400 : 200;
       res.status(status).json(response);
     } catch (error) {
-      const message =
+      const detail =
         error instanceof Error ? error.message : "Internal server error";
 
-      res.status(500).json(
-        buildError({
-          code: SrpcErrorCode.INTERNAL_ERROR,
-          message,
-        })
-      );
+      res.status(500).json(buildError(internalError(detail)));
     }
   };
+}
+
+function logRequest(
+  logger: SrpcLogger | undefined,
+  httpMethod: string,
+  body: unknown
+): void {
+  if (!logger?.request || !isSrpcRequest(body)) {
+    return;
+  }
+
+  logger.request({
+    httpMethod,
+    service: body.service,
+    method: body.method,
+    id: body.id,
+    params: body.params,
+  });
+}
+
+function logResponse(
+  logger: SrpcLogger | undefined,
+  body: unknown,
+  response: ReturnType<typeof buildSuccess> | ReturnType<typeof buildError>,
+  durationMs: number
+): void {
+  if (!logger?.response || !isSrpcRequest(body)) {
+    return;
+  }
+
+  logger.response({
+    service: body.service,
+    method: body.method,
+    id: body.id,
+    durationMs: Math.round(durationMs),
+    ok: !("error" in response),
+    code: "error" in response ? response.error.code : undefined,
+    message: "error" in response ? response.error.message : undefined,
+    detail: "error" in response ? response.error.detail : undefined,
+  });
 }
 
 function readSrpcPayload(req: Request): unknown {
@@ -106,10 +154,7 @@ function validateHttpMethod(
 
   if (actual !== expected) {
     return buildError(
-      {
-        code: SrpcErrorCode.METHOD_NOT_ALLOWED,
-        message: `Method '${rpc.method}' on '${rpc.service}' must be called with HTTP ${expected}, received ${actual}.`,
-      },
+      methodNotAllowedError(rpc.service, rpc.method, expected, actual),
       rpc.id
     );
   }
@@ -125,41 +170,23 @@ async function dispatchRequest(
   const service = options.services[rpc.service];
 
   if (!service) {
-    return buildError(
-      {
-        code: SrpcErrorCode.SERVICE_NOT_FOUND,
-        message: `Service '${rpc.service}' not found.`,
-      },
-      rpc.id
-    );
+    return buildError(serviceNotFoundError(rpc.service), rpc.id);
   }
 
   const handler = service[rpc.method];
 
   if (!handler) {
-    return buildError(
-      {
-        code: SrpcErrorCode.METHOD_NOT_FOUND,
-        message: `Method '${rpc.method}' not found on '${rpc.service}'.`,
-      },
-      rpc.id
-    );
+    return buildError(methodNotFoundError(rpc.service, rpc.method), rpc.id);
   }
 
   try {
     const result = await handler(rpc.params, context);
     return buildSuccess(result, rpc.id);
   } catch (error) {
-    const message =
+    const detail =
       error instanceof Error ? error.message : "Handler execution failed";
 
-    return buildError(
-      {
-        code: SrpcErrorCode.INTERNAL_ERROR,
-        message,
-      },
-      rpc.id
-    );
+    return buildError(internalError(detail), rpc.id);
   }
 }
 

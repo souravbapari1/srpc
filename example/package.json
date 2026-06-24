@@ -4,8 +4,17 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "start": "bun run index.ts",
     "dev": "bun run generate && bun run --watch index.ts",
-    "generate": "srpc-core generate"
+    "generate": "srpc generate --contract-dir ./contract --out ./generated/srpc-types.ts",
+    "contracts:list": "srpc package list",
+    "contracts:get": "srpc package get",
+    "contracts:pull": "srpc package pull",
+    "contracts:push": "srpc package push",
+    "contracts:validate": "srpc package validate",
+    "contracts:upload-example": "bun run contracts/upload.ts",
+    "contracts:upload-fetch": "bun run contracts/upload-fetch.ts",
+    "contracts:upload-axios": "bun run contracts/upload-axios.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -14,7 +23,9 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "axios": "^1.9.0",
     "express": "^5.2.1",
+    "srpc-cli": "file:../srpc-cli",
     "srpc-client": "file:../srpc-client",
     "srpc-core": "file:../srpc-core"
   }

@@ -1,0 +1,22 @@
+{
+  "name": "srpc-cli",
+  "module": "cli.ts",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "srpc": "./cli.ts"
+  },
+  "exports": {
+    ".": "./cli.ts",
+    "./client": "./src/client.ts"
+  },
+  "dependencies": {
+    "srpc-core": "file:../srpc-core"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "scripts": {
+    "test": "bun test"
+  }
+}

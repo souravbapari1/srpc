@@ -1,0 +1,14 @@
+package demo
+
+struct PingRequest {
+    message: string
+}
+
+struct PingResponse {
+    ok: boolean
+    echo: string
+}
+
+service DemoService {
+    @get ping(data: PingRequest) => PingResponse
+}

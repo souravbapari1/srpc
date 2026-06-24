@@ -74,6 +74,35 @@ app.use(createSrpcRouter({ services: [userService] }));
 app.listen(3100);
 ```
 
+### Contract docs (project-specific)
+
+Enable JSON docs generated from your `.ctr` / `.rpc` contracts:
+
+```typescript
+app.use(
+  createSrpcRouter({
+    services: [userService],
+    docs: { contractDir: "./contract" },
+  })
+);
+```
+
+| Route | Description |
+|-------|-------------|
+| `GET /docs` | HTML index of all contract packages |
+| `GET /docs/:package` | Structs, enums, and services in a package |
+| `GET /docs/:package/:service` | Methods, HTTP verbs, params, and return types |
+
+Pages are **HTML by default** in the browser. Append `?format=json` (or send `Accept: application/json`) for the JSON API.
+
+When handlers are registered via `defineService()`, each method includes `implemented: true | false`.
+
+Use `docs: true` to scan `./contract` from the current working directory, or pass a custom path:
+
+```typescript
+docs: { contractDir: "./contract", path: "/docs" }
+```
+
 See [example/](./example/) for the full project layout.
 
 ### Request context

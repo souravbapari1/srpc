@@ -37,13 +37,17 @@ export interface ServiceClientOptions extends SrpcHttpOptions {
 }
 
 export class SrpcError extends Error {
+  readonly detail?: string;
+
   constructor(
     readonly code: number,
     message: string,
-    readonly data?: unknown
+    readonly data?: unknown,
+    detail?: string
   ) {
     super(message);
     this.name = "SrpcError";
+    this.detail = detail;
   }
 }
 
@@ -221,7 +225,12 @@ function parseSrpcResponse<T>(body: unknown): T {
   }
 
   if ("error" in body) {
-    throw new SrpcError(body.error.code, body.error.message, body.error.data);
+    throw new SrpcError(
+      body.error.code,
+      body.error.message,
+      body.error.data,
+      body.error.detail
+    );
   }
 
   return body.result as T;

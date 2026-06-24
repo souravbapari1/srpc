@@ -30,10 +30,12 @@ test("createServiceClient exposes typed methods", () => {
   expect(typeof user.getUser).toBe("function");
 });
 
-test("SrpcError carries code and message", () => {
-  const error = new SrpcError(-32603, "failed", { detail: true });
+test("SrpcError carries code, message, detail, and data", () => {
+  const error = new SrpcError(-32603, "Something went wrong.", { detail: true }, "stack trace");
 
   expect(error.name).toBe("SrpcError");
   expect(error.code).toBe(-32603);
+  expect(error.message).toBe("Something went wrong.");
   expect(error.data).toEqual({ detail: true });
+  expect(error.detail).toBe("stack trace");
 });

@@ -1,0 +1,21 @@
+/** Shared docs palette — used in CSS variables and the contract visualizer. */
+export const DOCS_THEME = {
+  teal: "#0d9488",
+  tealDark: "#0f766e",
+  blue: "#2563eb",
+  indigo: "#4f46e5",
+  purple: "#9333ea",
+  orange: "#ea580c",
+  rose: "#e11d48",
+  green: "#16a34a",
+  amber: "#d97706",
+  slate: "#52525b",
+  text: "#18181b",
+  textMuted: "#71717a",
+  border: "#e4e4e7",
+  borderMuted: "#d4d4d8",
+  borderStrong: "#a1a1aa",
+  bg: "#ffffff",
+  bgMuted: "#fafafa",
+  bgActive: "#f4f4f5",
+} as const;

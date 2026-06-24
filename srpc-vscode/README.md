@@ -1,60 +1,104 @@
-# SRPC — VS Code Extension
+# SRPC for VS Code
 
-Language support for **SRPC** contract files (`.ctr`, `.rpc`). Provides syntax highlighting, autocomplete, diagnostics, go-to-definition, rename, and formatting via a built-in language server.
+Edit **SRPC contract files** (`.ctr`, `.rpc`) with syntax highlighting, autocomplete, inline errors, go-to-definition, rename, and formatting — all built into VS Code.
 
-## Features
+SRPC contracts describe your API: structs, enums, and RPC services. This extension understands the whole contract folder in your workspace so you can reference types across files without `import` statements.
 
-- **Syntax highlighting** for `.ctr` and `.rpc` files
-- **Autocomplete** for keywords, types, and workspace symbols
-- **Hover** documentation for keywords and symbols
-- **Diagnostics** for syntax errors, unknown types, and duplicate names
-- **Go to definition** across files in the workspace
-- **Rename** with cross-file reference updates
-- **Document formatting**
-- **Workspace-wide type resolution** — no `import` statements required
-- **Auto package** — inserts a unique `package` line in new empty files
-- **File icons** (optional) for contract files
+## Install
 
-## Quick start
+### From a `.vsix` package
 
-### Install from source
+1. Build or obtain `srpc-vscode-*.vsix`
+2. In VS Code: **Extensions** → **…** → **Install from VSIX…**
+3. Reload the window if prompted
+
+### From source (monorepo)
 
 ```bash
 cd srpc-vscode
 bun install
-bun run compile
-bunx @vscode/vsce package --allow-missing-repository
+bun run package
 ```
 
-Install the generated `.vsix` from VS Code: **Extensions → … → Install from VSIX**.
+Install the generated `.vsix` as above.
 
-### Development
+### Requirements
 
-```bash
-cd srpc-vscode
-bun install
-bun run compile   # or: bun run watch
+- VS Code **1.85** or newer
+- A workspace folder containing `.ctr` or `.rpc` files
+
+The extension activates automatically when you open a contract file or when your workspace contains one.
+
+---
+
+## Getting started
+
+1. **Open your project** in VS Code (for example, a repo with `contract/` or `contracts/`).
+2. **Open a contract file** — e.g. `contract/user.ctr`.
+3. Start typing. The language server indexes all contract files in the same scope and offers completions, hovers, and diagnostics as you work.
+
+### Recommended folder layout
+
+```
+my-app/
+└── contract/          # or contracts/
+    ├── common.ctr     # shared types
+    ├── user.ctr
+    └── catalog.ctr
 ```
 
-Open the repo root in VS Code and press **F5** to launch an Extension Development Host with the language server loaded.
+If your files live under `contract/` or `contracts/`, the extension groups them together for cross-file type resolution. Files outside those folders are scoped to the workspace folder they belong to.
 
-Run tests:
+### New empty files
 
-```bash
-bun test tests/
-```
+When you create a new `.ctr` or `.rpc` file, the extension can automatically insert a unique `package` line at the top (based on the filename). This is on by default — see [Settings](#settings).
 
-## Language overview
+---
+
+## What you get
+
+| Feature | What it does |
+|---------|----------------|
+| **Syntax highlighting** | Keywords, types, decorators, strings, and comments are colorized |
+| **Autocomplete** | Keywords, scalar types, structs, enums, and services from your workspace |
+| **Snippets** | Tab-complete `struct`, `enum`, `service`, and `package` blocks |
+| **Hover** | Docs for keywords and symbol definitions |
+| **Diagnostics** | Syntax errors, unknown types, duplicate names, and naming conflicts |
+| **Go to definition** | Jump to a struct, enum, service, or field definition (`F12` / Cmd+click) |
+| **Rename** | Rename a symbol and update references across all contract files (`F2`) |
+| **Format document** | Format the whole file (`Shift+Alt+F` / **Format Document**) |
+
+### Autocomplete tips
+
+- At the **top level** of a file, start typing `struct`, `enum`, `service`, or `package` for snippets.
+- After **`:`** or **`=>`**, you get type suggestions from your workspace (e.g. `User`, `common.Address`, `string[]`).
+- Inside a **service**, method snippets include HTTP decorators: `@get`, `@post`, `@put`, `@patch`, `@delete`.
+- Trigger characters include `:`, `<`, `.`, and space.
+
+### Errors you might see
+
+| Message | Meaning |
+|---------|---------|
+| `Unknown type '…'` | The type name does not exist in the indexed contract scope |
+| `Duplicate declaration '…'` | Same name used twice in one file |
+| `Duplicate struct/enum/service/package '…'` | Name collision across files in the same scope |
+| `import` statements are unnecessary | SRPC does not use imports — remove them; types resolve by name |
+
+Hover over a squiggle or open **Problems** (`Ctrl+Shift+M`) for details.
+
+---
+
+## Writing contracts
 
 ### Package
 
-Every file with declarations should declare a package at the top:
+Every file with declarations should start with a package name:
 
 ```srpc
 package user
 ```
 
-New empty `.ctr` / `.rpc` files get a unique package name automatically (based on the filename) when `srpc.autoPackage` is enabled.
+Package names must be unique across all contract files in the same scope.
 
 ### Struct
 
@@ -66,23 +110,29 @@ struct User {
 }
 ```
 
+Optional fields use `?`. Use `//` for line comments.
+
 ### Enum
 
 ```srpc
-enum Role {
+enum UserRole {
+    CUSTOMER
     ADMIN
-    USER
 }
 ```
 
 ### Service
 
-Services use braces. Methods use `=>` for the return type:
+Services group RPC methods. Methods use `=>` for the return type and optional HTTP verb decorators:
 
 ```srpc
 service UserService {
-    getUser(
-        id: string
+    @get getUser(
+        data: UserRequest
+    ) => User
+
+    @post createUser(
+        data: RegisterUserRequest
     ) => User
 }
 ```
@@ -97,58 +147,118 @@ service UserService {
 
 ### Cross-file references
 
-Types from other contract files resolve automatically across the workspace. Use a simple name when it is unique, or a package-qualified name:
+No `import` lines. Reference types from other packages by name:
 
 ```srpc
-products: products.Product[]
-owner: meradhan.user.User
+// In package user — references types from package common
+addresses: common.Address[]
+currency: common.CurrencyCode
 ```
 
-`import` statements are **not** supported. If present, the extension reports that they are unnecessary.
+Use a **simple name** when it is unique in scope, or a **qualified name** (`package.Type`) when needed:
 
-## Naming rules
+```srpc
+owner: user.User
+items: catalog.Product[]
+```
 
-These names share a **single global namespace** across all contract files in the workspace:
+**Go to definition** and **rename** work across files in the same contract scope.
 
-- `package` names
-- `struct` names
-- `enum` names
-- `service` names
+### Global naming
 
-If `Product` is defined as a struct in `products.ctr`, you cannot reuse `Product` as a struct, enum, service, or package name in another file. The editor shows an error on duplicates.
+These share **one namespace** per contract scope (all files in the same `contract/` folder or workspace):
+
+- package names
+- struct names
+- enum names
+- service names
+
+If `Product` is a struct in `catalog.ctr`, you cannot reuse `Product` as an enum, service, or package elsewhere in that scope.
+
+---
 
 ## Settings
 
+Open **Settings** and search for `srpc`, or add to `.vscode/settings.json`:
+
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `srpc.autoPackage` | `true` | Auto-insert a unique `package` declaration in new empty files |
-| `srpc.enableFileIcons` | `true` | Use SRPC file icons for `.ctr` and `.rpc` |
+| `srpc.autoPackage` | `true` | Insert a unique `package` line when you open a new empty `.ctr` / `.rpc` file |
 
-To enable file icons manually: **File → Preferences → File Icon Theme → SRPC File Icons**.
-
-## Project layout
-
-```
-srpc-vscode/
-├── client/src/          # VS Code extension host (starts the language client)
-├── server/src/          # Language server (parser, workspace index, LSP handlers)
-├── syntaxes/            # TextMate grammar
-├── icons/               # File icon theme
-├── tests/               # Bun test suite
-└── scripts/build.mjs    # esbuild bundle for client + server
-```
+---
 
 ## Example workspace
 
+The SRPC monorepo includes a full e-commerce contract set:
+
 ```
-contract/
-├── user.ctr       # package user — User, UserService, …
-└── products.ctr   # package products — Product
+example/contract/
+├── common.ctr
+├── user.ctr
+├── catalog.ctr
+├── cart.ctr
+└── …
 ```
 
-`user.ctr` can reference `products.Product` without imports because both files are indexed by the language server.
+Open the `srpc` repo root in VS Code, browse `example/contract/`, and try go-to-definition on `common.Address` or `catalog.Product` from `user.ctr`.
 
-## Requirements
+---
 
-- VS Code `^1.85.0`
-- [Bun](https://bun.sh) (for development and tests)
+## Troubleshooting
+
+**Extension does not activate**
+
+- Confirm the file ends in `.ctr` or `.rpc`
+- Reload the window: **Developer: Reload Window**
+
+**Autocomplete or diagnostics missing**
+
+- Save the file and wait a moment for the language server to index
+- Check **Output → SRPC Language Server** for errors
+- Ensure contract files are in the same `contract/` / `contracts/` folder (or same workspace folder)
+
+**Go to definition does not cross files**
+
+- Verify both files are in the same scoped folder (see [Getting started](#getting-started))
+- Check for typos in package-qualified names (`common.Address`, not `Common.Address`)
+
+**Language server failed to start**
+
+- Reload VS Code
+- If developing from source, run `bun run compile` in `srpc-vscode/` first
+
+---
+
+## Related tools
+
+| Tool | Role |
+|------|------|
+| `srpc-cli` | Generate server/client code from contracts |
+| `srpc-mcp` | Expose contract docs to AI assistants via MCP |
+| `example` | Runnable demo app with sample contracts |
+
+---
+
+## For contributors
+
+```bash
+cd srpc-vscode
+bun install
+bun run compile   # or: bun run watch
+```
+
+Press **F5** in VS Code to launch an Extension Development Host.
+
+```bash
+bun test tests/
+```
+
+### Project layout
+
+```
+srpc-vscode/
+├── client/src/       # VS Code extension (starts language client)
+├── server/src/       # Language server (parser, index, LSP)
+├── syntaxes/         # TextMate grammar
+└── tests/            # Test suite
+```

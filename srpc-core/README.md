@@ -2,36 +2,11 @@
 
 Read SRPC contract files (`.ctr`, `.rpc`) and generate TypeScript types for your codebase.
 
+`srpc-core` is the library/runtime package. CLI workflows now live in `srpc-cli`.
+
 ## Generate types
 
-From your app (with `srpc-core` installed):
-
-```bash
-bun run generate
-```
-
-```json
-{
-  "scripts": {
-    "generate": "srpc-core generate"
-  }
-}
-```
-
-Defaults: reads `contract/` and writes `generated/srpc-types.ts` relative to the current working directory.
-
-Custom paths:
-
-```bash
-srpc-core generate --contract-dir ./contract --out ./generated/srpc-types.ts
-```
-
-From the `srpc-core` package itself (monorepo):
-
-```bash
-cd srpc-core
-bun run generate
-```
+Use the programmatic API from your app or from `srpc-cli`.
 
 ## Programmatic API
 

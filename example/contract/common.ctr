@@ -13,6 +13,12 @@ enum CurrencyCode {
     JPY
 }
 
+enum AddressType {
+    HOME
+    WORK
+    OTHER
+}
+
 struct Money {
     amount: int
     currency: CurrencyCode
@@ -29,6 +35,7 @@ struct Address {
     country: string
     phone?: string
     isDefault?: boolean
+    addressType?: AddressType
 }
 
 struct GeoPoint {

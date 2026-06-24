@@ -8,6 +8,10 @@ import {
 import { empty, nextId, now, paginate, paginationMeta, requireEntity } from "./helpers.ts";
 import { defaultUser, store } from "./store.ts";
 
+async function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function createLoginResponse(user: ReturnType<typeof defaultUser>) {
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
   return {
@@ -31,7 +35,8 @@ function createUserFromRegister(email: string, profile: UserProfile, preferences
 }
 
 export const userService = defineService(UserService, {
-  getUser({ id }, ctx: SrpcHandlerContext) {
+  async getUser({ id }, ctx: SrpcHandlerContext) {
+    await delay(1000);
     console.log(`getUser id=${id} token=${ctx.getBearerToken() ?? "none"}`);
     return requireEntity(store.users.get(id), "User", id);
   },

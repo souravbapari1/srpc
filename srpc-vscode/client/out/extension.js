@@ -18136,24 +18136,7 @@ var path = __toESM(require("path"));
 var import_vscode = require("vscode");
 var import_node = __toESM(require_node3());
 var client;
-var ICON_THEME_ID = "srpc-file-icons";
-async function enableFileIcons() {
-  const enabled = import_vscode.workspace.getConfiguration("srpc").get("enableFileIcons", true);
-  if (!enabled) {
-    return;
-  }
-  const iconTheme = import_vscode.workspace.getConfiguration("workbench").get("iconTheme");
-  if (iconTheme === ICON_THEME_ID) {
-    return;
-  }
-  const isDefaultTheme = !iconTheme || iconTheme === "vs-seti-vscode" || iconTheme === "vs-minimal";
-  if (!isDefaultTheme) {
-    return;
-  }
-  await import_vscode.workspace.getConfiguration("workbench").update("iconTheme", ICON_THEME_ID, true);
-}
 function activate(context) {
-  void enableFileIcons();
   const serverModule = context.asAbsolutePath(
     path.join("server", "out", "server.js")
   );

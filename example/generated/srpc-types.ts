@@ -378,6 +378,12 @@ export enum CurrencyCode {
   JPY = "JPY",
 }
 
+export enum AddressType {
+  HOME = "HOME",
+  WORK = "WORK",
+  OTHER = "OTHER",
+}
+
 export interface Money {
   amount: number;
   currency: CurrencyCode;
@@ -394,6 +400,7 @@ export interface Address {
   country: string;
   phone?: string;
   isDefault?: boolean;
+  addressType?: AddressType;
 }
 
 export interface GeoPoint {
@@ -459,6 +466,22 @@ export interface AuditFields {
   updatedAt: Date;
   createdBy?: string;
   updatedBy?: string;
+}
+
+// demo.ctr
+// package demo
+
+export interface PingRequest {
+  message: string;
+}
+
+export interface PingResponse {
+  ok: boolean;
+  echo: string;
+}
+
+export interface DemoService {
+  ping(data: PingRequest): PingResponse;
 }
 
 // inventory.ctr
@@ -1415,6 +1438,7 @@ export type SrpcServiceInterfaces = {
   ProductService: ProductService;
   CategoryService: CategoryService;
   BrandService: BrandService;
+  DemoService: DemoService;
   InventoryService: InventoryService;
   NotificationService: NotificationService;
   OrderService: OrderService;
@@ -1504,6 +1528,13 @@ export const __srpcServices = {
       deleteBrand: { httpMethod: "DELETE" },
     },
   } satisfies SrpcServiceMeta<BrandService>,
+  DemoService: {
+    package: "demo",
+    service: "DemoService",
+    methods: {
+      ping: { httpMethod: "GET" },
+    },
+  } satisfies SrpcServiceMeta<DemoService>,
   InventoryService: {
     package: "inventory",
     service: "InventoryService",
@@ -1666,6 +1697,7 @@ export const CartService = __srpcServices.CartService as SrpcServiceMeta<CartSer
 export const ProductService = __srpcServices.ProductService as SrpcServiceMeta<ProductService, "ProductService">;
 export const CategoryService = __srpcServices.CategoryService as SrpcServiceMeta<CategoryService, "CategoryService">;
 export const BrandService = __srpcServices.BrandService as SrpcServiceMeta<BrandService, "BrandService">;
+export const DemoService = __srpcServices.DemoService as SrpcServiceMeta<DemoService, "DemoService">;
 export const InventoryService = __srpcServices.InventoryService as SrpcServiceMeta<InventoryService, "InventoryService">;
 export const NotificationService = __srpcServices.NotificationService as SrpcServiceMeta<NotificationService, "NotificationService">;
 export const OrderService = __srpcServices.OrderService as SrpcServiceMeta<OrderService, "OrderService">;

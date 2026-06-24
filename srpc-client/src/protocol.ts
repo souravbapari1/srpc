@@ -13,6 +13,8 @@ export interface SrpcRequest {
 export interface SrpcErrorBody {
   code: number;
   message: string;
+  /** Developer-facing error description. */
+  detail?: string;
   data?: unknown;
 }
 
