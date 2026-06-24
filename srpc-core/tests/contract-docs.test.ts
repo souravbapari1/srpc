@@ -111,8 +111,10 @@ test("docs router serves HTML by default and JSON with ?format=json", async () =
     expect(indexRes.status).toBe(200);
     expect(indexRes.headers.get("content-type")).toContain("text/html");
     const indexHtml = await indexRes.text();
-    expect(indexHtml).toContain("<title>API Overview · SRPC API Docs</title>");
-    expect(indexHtml).toContain("All services");
+    expect(indexHtml).toContain("<title>Getting Started · SRPC API Docs</title>");
+    expect(indexHtml).toContain("Quick start");
+    expect(indexHtml).toContain("Browse all APIs");
+    expect(indexHtml).toContain("Start here");
     expect(indexHtml).toContain("UserService");
 
     const indexJsonRes = await fetch(`${baseUrl}/docs?format=json`);
@@ -147,7 +149,7 @@ test("docs router serves HTML by default and JSON with ?format=json", async () =
     const typesRes = await fetch(`${baseUrl}/docs/types`);
     expect(typesRes.status).toBe(200);
     const typesHtml = await typesRes.text();
-    expect(typesHtml).toContain("Data types");
+    expect(typesHtml).toContain("Data shapes");
     expect(typesHtml).toContain("common.SortDirection");
 
     const structRes = await fetch(`${baseUrl}/docs/user/structs/User`);
@@ -163,7 +165,7 @@ test("docs router serves HTML by default and JSON with ?format=json", async () =
 
     const packageStructsRes = await fetch(`${baseUrl}/docs/user/structs`);
     expect(packageStructsRes.status).toBe(200);
-    expect(await packageStructsRes.text()).toContain("user structs");
+    expect(await packageStructsRes.text()).toContain("user objects");
 
     const visualizerRes = await fetch(`${baseUrl}/docs/visualizer`);
     expect(visualizerRes.status).toBe(200);

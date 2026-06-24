@@ -6,6 +6,7 @@ import type {
 } from "../../src/contract-docs.ts";
 import { exampleRequest } from "../examples.ts";
 import { codeBlock } from "../code-block.ts";
+import { describeMethod, describeParams } from "../guide.ts";
 import { escapeHtml } from "../escape.ts";
 import { buildTypeLinkIndex, linkifyContractType } from "../type-links.ts";
 import { cls, httpBadge, icon, methodChip } from "../ui.ts";
@@ -16,7 +17,7 @@ export function renderServiceCard(packageName: string, service: ServiceDoc): str
   const implemented = service.methods.filter(method => method.implemented).length;
   const status =
     service.methods.some(method => method.implemented !== undefined)
-      ? `<p class="${cls.meta} mt-2">${implemented} of ${service.methods.length} methods implemented on this server</p>`
+      ? `<p class="${cls.meta} mt-2">${implemented} of ${service.methods.length} ready on this server</p>`
       : "";
 
   return `<div class="border-b border-zinc-100 py-4 last:border-0">
@@ -24,7 +25,7 @@ export function renderServiceCard(packageName: string, service: ServiceDoc): str
       <span class="text-zinc-400">${icon("plug")}</span>
       <a href="/docs/${escapeHtml(packageName)}/${escapeHtml(service.name)}" class="text-zinc-900 hover:text-brand">${escapeHtml(service.name)}</a>
     </h4>
-    <p class="mt-1 font-mono text-xs text-zinc-500">${escapeHtml(service.qualifiedName)} · ${service.methods.length} method${service.methods.length === 1 ? "" : "s"}</p>
+    <p class="mt-1 text-sm text-zinc-600">${service.methods.length} API call${service.methods.length === 1 ? "" : "s"} available</p>
     <div class="mt-3 flex flex-wrap gap-1.5">${chips}</div>
     ${status}
   </div>`;
@@ -40,7 +41,7 @@ export function renderAllServices(store: ContractDocsStore): string {
   }
 
   if (byPackage.size === 0) {
-    return `<p class="${cls.empty}">No services found in contracts.</p>`;
+    return `<p class="${cls.empty}">No APIs found yet. Add services to your contract files to see them here.</p>`;
   }
 
   return [...byPackage.entries()]
@@ -48,7 +49,8 @@ export function renderAllServices(store: ContractDocsStore): string {
     .map(([packageName, services]) => {
       const cards = services.map(service => renderServiceCard(packageName, service)).join("");
       return `<section class="mb-8 last:mb-0">
-        <h3 class="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-zinc-500">${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="hover:text-brand">${escapeHtml(packageName)}</a> package</h3>
+        <h3 class="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-zinc-500">${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="hover:text-brand">${escapeHtml(packageName)}</a></h3>
+        <p class="mb-3 text-sm text-zinc-500">Related APIs grouped together</p>
         ${cards}
       </section>`;
     })
@@ -62,22 +64,25 @@ export function renderMethodBlock(
   method: MethodDoc
 ): string {
   const typeIndex = buildTypeLinkIndex(store);
-  const paramsText =
+  const paramsDetail =
     method.params.length === 0
-      ? "No parameters"
-      : method.params
-          .map(
-            param =>
-              `<code class="rounded bg-zinc-100 px-1 py-0.5 font-mono text-sm">${escapeHtml(param.name)}</code> (${linkifyContractType(param.type, typeIndex, contextPackage)})`
-          )
-          .join(", ");
+      ? ""
+      : `<details class="mt-3 rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600">
+          <summary class="cursor-pointer font-medium text-zinc-700">Show field types (advanced)</summary>
+          <p class="mt-2">${method.params
+            .map(
+              param =>
+                `<code class="rounded bg-white px-1 py-0.5 font-mono text-xs ring-1 ring-zinc-200">${escapeHtml(param.name)}</code> → ${linkifyContractType(param.type, typeIndex, contextPackage)}`
+            )
+            .join("<br />")}</p>
+        </details>`;
 
   const handler =
     method.implemented === undefined
       ? ""
       : method.implemented
-        ? `<span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">${icon("circle-check")} Handler ready</span>`
-        : `<span class="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-500 ring-1 ring-inset ring-zinc-200">${icon("circle-xmark")} Not implemented yet</span>`;
+        ? `<span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">${icon("circle-check")} Live on this server</span>`
+        : `<span class="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-500 ring-1 ring-inset ring-zinc-200">${icon("circle-xmark")} Not wired up yet</span>`;
 
   return `<section class="py-6 first:pt-0" id="${escapeHtml(method.name)}">
     <div class="flex flex-wrap items-center gap-2">
@@ -85,14 +90,15 @@ export function renderMethodBlock(
       ${httpBadge(method.httpMethod)}
       ${handler}
     </div>
-    <p class="${cls.meta} mt-2">${icon("terminal")} Call <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(service.qualifiedName)}.${escapeHtml(method.name)}</code> with the parameters below.</p>
-    <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-[7rem_1fr]">
-      <dt class="flex items-center gap-1.5 font-semibold text-zinc-500">${icon("arrow-right-to-bracket")} Input</dt>
-      <dd class="text-zinc-800">${paramsText}</dd>
-      <dt class="flex items-center gap-1.5 font-semibold text-zinc-500">${icon("arrow-right-from-bracket")} Returns</dt>
+    <p class="mt-2 text-sm leading-relaxed text-zinc-700">${describeMethod(method.name)}</p>
+    <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-[8.5rem_1fr]">
+      <dt class="font-semibold text-zinc-500">What you send</dt>
+      <dd class="text-zinc-800">${describeParams(method)}</dd>
+      <dt class="font-semibold text-zinc-500">What you get</dt>
       <dd class="text-zinc-800">${linkifyContractType(method.returnType, typeIndex, contextPackage)}</dd>
     </dl>
-    <p class="${cls.meta} mb-3 mt-4">${icon("code")} Example request</p>
+    ${paramsDetail}
+    <p class="${cls.meta} mb-3 mt-4">${icon("code")} Copy this request</p>
     ${codeBlock(exampleRequest(service.qualifiedName, method))}
   </section>`;
 }

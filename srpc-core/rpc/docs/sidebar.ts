@@ -73,16 +73,14 @@ export function renderSidebar(ctx: PageContext): string {
       <nav>
         <p class="mb-2 px-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("compass")} Navigation</p>
         <ul class="space-y-0.5">
-          <li><a class="${navLink(overviewActive)}" href="/docs">${icon("house")} Overview</a></li>
-          <li><a class="${navLink(activeTypes ?? false)}" href="/docs/types">${icon("cubes")} Data types</a></li>
-          <li><a class="${navLink(activeVisualizer ?? false)}" href="/docs/visualizer">${icon("diagram-project")} Visualizer</a></li>
+          <li><a class="${navLink(overviewActive)}" href="/docs">${icon("house")} Start here</a></li>
+          <li><a class="${navLink(false)}" href="/playground">${icon("flask")} Try in browser</a></li>
+          <li><a class="${navLink(activeTypes ?? false)}" href="/docs/types">${icon("cubes")} Data shapes</a></li>
+          <li><a class="${navLink(activeVisualizer ?? false)}" href="/docs/visualizer">${icon("diagram-project")} Map view</a></li>
         </ul>
         <p class="mb-2 mt-6 px-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("box")} Packages</p>
         <ul class="space-y-0.5">${packageNav}</ul>
       </nav>
-      <div class="mt-auto border-t border-zinc-100 pt-4">
-        <a href="/playground" class="${navLink(false)}">${icon("flask")} Playground</a>
-      </div>
     </div>
   </aside>`;
 }

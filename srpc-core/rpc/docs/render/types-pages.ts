@@ -31,7 +31,7 @@ export function renderTypesIndex(store: ContractDocsStore): string {
       const structLinks =
         types.structs.length === 0
           ? ""
-          : `<h3 class="mb-2 mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("table-cells")} Structs</h3>
+          : `<h3 class="mb-2 mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("table-cells")} Objects</h3>
              <ul class="space-y-1">${types.structs
                .map(
                  struct =>
@@ -42,7 +42,7 @@ export function renderTypesIndex(store: ContractDocsStore): string {
       const enumLinks =
         types.enums.length === 0
           ? ""
-          : `<h3 class="mb-2 mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("list-ul")} Enums</h3>
+          : `<h3 class="mb-2 mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">${icon("list-ul")} Fixed choices</h3>
              <ul class="space-y-1">${types.enums
                .map(
                  enumDoc =>
@@ -52,7 +52,7 @@ export function renderTypesIndex(store: ContractDocsStore): string {
 
       return `<section class="mb-8 border-b border-zinc-100 pb-8 last:mb-0 last:border-0 last:pb-0">
         <h3 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-zinc-500">${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="hover:text-brand">${escapeHtml(packageName)}</a> package</h3>
-        <p class="${cls.meta} mt-1">${types.structs.length} struct${types.structs.length === 1 ? "" : "s"} · ${types.enums.length} enum${types.enums.length === 1 ? "" : "s"} · <a href="/docs/${escapeHtml(packageName)}/structs" class="text-brand hover:text-brand-dark">all structs</a> · <a href="/docs/${escapeHtml(packageName)}/enums" class="text-brand hover:text-brand-dark">all enums</a></p>
+        <p class="${cls.meta} mt-1">${types.structs.length} object type${types.structs.length === 1 ? "" : "s"} · ${types.enums.length} fixed-choice type${types.enums.length === 1 ? "" : "s"} · <a href="/docs/${escapeHtml(packageName)}/structs" class="text-brand hover:text-brand-dark">all objects</a> · <a href="/docs/${escapeHtml(packageName)}/enums" class="text-brand hover:text-brand-dark">all choices</a></p>
         ${structLinks}
         ${enumLinks}
       </section>`;
@@ -60,22 +60,22 @@ export function renderTypesIndex(store: ContractDocsStore): string {
     .join("");
 
   return page(
-    "Data types",
+    "Data shapes",
     `<article class="${cls.panel}">
-      <h1 class="${cls.h1}">${icon("cubes", cls.h1Icon)} Data types</h1>
+      <h1 class="${cls.h1}">${icon("cubes", cls.h1Icon)} Data shapes</h1>
       <p class="${cls.lead}">
-        Structs and enums defined in your contracts. These are the shapes of request bodies, response objects, and shared values used across services.
+        The JSON shapes your APIs use — objects with named fields, and fixed lists of allowed values. Open any type to see its fields and a sample JSON object.
       </p>
       <div class="${cls.stats}">
-        ${statCard("table-cells", index.totalStructs, "structs", "structs")}
-        ${statCard("list-ul", index.totalEnums, "enums", "enums")}
+        ${statCard("table-cells", index.totalStructs, "object types", "structs")}
+        ${statCard("list-ul", index.totalEnums, "fixed choices", "enums")}
         ${statCard("boxes-stacked", index.packages.length, "packages", "packages")}
       </div>
     </article>
     <article class="${cls.panel}">
-      ${panelHeading("layer-group", "All structs &amp; enums")}
-      <p class="${cls.meta} mb-4">Click any type to see its full field list and an example JSON object.</p>
-      ${sections || `<p class="${cls.empty}">No structs or enums found in contracts.</p>`}
+      ${panelHeading("layer-group", "Browse by package")}
+      <p class="${cls.meta} mb-4">Click a type name to see every field and an example you can copy.</p>
+      ${sections || `<p class="${cls.empty}">No data shapes found in your contracts yet.</p>`}
     </article>`,
     { store, activeTypes: true }
   );
@@ -86,15 +86,15 @@ export function renderPackageStructs(
   pkg: ContractPackageDocs
 ): string {
   return page(
-    `${pkg.package} structs`,
+    `${pkg.package} objects`,
     `<article class="${cls.panel}">
-      <h1 class="${cls.h1}">${icon("table-cells", cls.h1Icon)} ${escapeHtml(pkg.package)} structs</h1>
-      <p class="${cls.lead}">All struct types in the <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(pkg.package)}</code> package from <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(pkg.file)}</code>.</p>
-      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data types</a> · ${icon("box")} <a href="/docs/${escapeHtml(pkg.package)}" class="text-brand hover:text-brand-dark">Package overview</a></p>
+      <h1 class="${cls.h1}">${icon("table-cells", cls.h1Icon)} ${escapeHtml(pkg.package)} objects</h1>
+      <p class="${cls.lead}">JSON object types used in the <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(pkg.package)}</code> package.</p>
+      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data shapes</a> · ${icon("box")} <a href="/docs/${escapeHtml(pkg.package)}" class="text-brand hover:text-brand-dark">Package overview</a></p>
     </article>
     <article class="${cls.panel}">
-      ${panelHeading("table-cells", `Structs (${pkg.structs.length})`)}
-      ${pkg.structs.length === 0 ? `<p class="${cls.empty}">No structs in this package.</p>` : `<div class="grid gap-4 sm:grid-cols-2">${pkg.structs.map(struct => renderStructCard(store, pkg.package, struct)).join("")}</div>`}
+      ${panelHeading("table-cells", `Objects (${pkg.structs.length})`)}
+      ${pkg.structs.length === 0 ? `<p class="${cls.empty}">No object types in this package.</p>` : `<div class="grid gap-4 sm:grid-cols-2">${pkg.structs.map(struct => renderStructCard(store, pkg.package, struct)).join("")}</div>`}
     </article>`,
     { store, activePackage: pkg.package, activeTypeKind: "struct" }
   );
@@ -105,15 +105,15 @@ export function renderPackageEnums(
   pkg: ContractPackageDocs
 ): string {
   return page(
-    `${pkg.package} enums`,
+    `${pkg.package} choices`,
     `<article class="${cls.panel}">
-      <h1 class="${cls.h1}">${icon("list-ul", cls.h1Icon)} ${escapeHtml(pkg.package)} enums</h1>
-      <p class="${cls.lead}">All enum types in the <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(pkg.package)}</code> package from <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(pkg.file)}</code>.</p>
-      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data types</a> · ${icon("box")} <a href="/docs/${escapeHtml(pkg.package)}" class="text-brand hover:text-brand-dark">Package overview</a></p>
+      <h1 class="${cls.h1}">${icon("list-ul", cls.h1Icon)} ${escapeHtml(pkg.package)} fixed choices</h1>
+      <p class="${cls.lead}">Fields that must be one of a fixed set of values in the <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(pkg.package)}</code> package.</p>
+      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data shapes</a> · ${icon("box")} <a href="/docs/${escapeHtml(pkg.package)}" class="text-brand hover:text-brand-dark">Package overview</a></p>
     </article>
     <article class="${cls.panel}">
-      ${panelHeading("list-ul", `Enums (${pkg.enums.length})`)}
-      ${pkg.enums.length === 0 ? `<p class="${cls.empty}">No enums in this package.</p>` : `<div class="grid gap-4 sm:grid-cols-2">${pkg.enums.map(enumDoc => renderEnumCard(pkg.package, enumDoc)).join("")}</div>`}
+      ${panelHeading("list-ul", `Fixed choices (${pkg.enums.length})`)}
+      ${pkg.enums.length === 0 ? `<p class="${cls.empty}">No fixed-choice types in this package.</p>` : `<div class="grid gap-4 sm:grid-cols-2">${pkg.enums.map(enumDoc => renderEnumCard(pkg.package, enumDoc)).join("")}</div>`}
     </article>`,
     { store, activePackage: pkg.package, activeTypeKind: "enum" }
   );
@@ -128,11 +128,11 @@ export function renderStructDocs(
     struct.name,
     `<article class="${cls.panel}">
       <h1 class="${cls.h1}">${icon("table-cells", cls.h1Icon)} <code class="font-mono">${escapeHtml(struct.name)}</code></h1>
-      <p class="${cls.lead}">Struct <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(struct.qualifiedName)}</code> — a data object with ${struct.fields.length} field${struct.fields.length === 1 ? "" : "s"}.</p>
-      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data types</a> · ${icon("table-cells")} <a href="/docs/${escapeHtml(packageName)}/structs" class="text-brand hover:text-brand-dark">All ${escapeHtml(packageName)} structs</a> · ${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="text-brand hover:text-brand-dark">${escapeHtml(packageName)} package</a></p>
+      <p class="${cls.lead}">A data object with ${struct.fields.length} field${struct.fields.length === 1 ? "" : "s"}. Full name: <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(struct.qualifiedName)}</code>.</p>
+      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data shapes</a> · ${icon("table-cells")} <a href="/docs/${escapeHtml(packageName)}/structs" class="text-brand hover:text-brand-dark">All ${escapeHtml(packageName)} objects</a> · ${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="text-brand hover:text-brand-dark">${escapeHtml(packageName)} package</a></p>
     </article>
     <article class="${cls.panel}">
-      ${panelHeading("list", "Fields")}
+      ${panelHeading("list", "Fields in this object")}
       ${renderFieldsTable(store, packageName, struct)}
     </article>
     <article class="${cls.panel} bg-zinc-50">
@@ -165,8 +165,8 @@ export function renderEnumDocs(
     enumDoc.name,
     `<article class="${cls.panel}">
       <h1 class="${cls.h1}">${icon("list-ul", cls.h1Icon)} <code class="font-mono">${escapeHtml(enumDoc.name)}</code></h1>
-      <p class="${cls.lead}">Enum <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(enumDoc.qualifiedName)}</code> — one of ${enumDoc.values.length} allowed values.</p>
-      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data types</a> · ${icon("list-ul")} <a href="/docs/${escapeHtml(packageName)}/enums" class="text-brand hover:text-brand-dark">All ${escapeHtml(packageName)} enums</a> · ${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="text-brand hover:text-brand-dark">${escapeHtml(packageName)} package</a></p>
+      <p class="${cls.lead}">Must be one of ${enumDoc.values.length} allowed values. Full name: <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm">${escapeHtml(enumDoc.qualifiedName)}</code>.</p>
+      <p class="${cls.meta}">${icon("cubes")} <a href="/docs/types" class="text-brand hover:text-brand-dark">All data shapes</a> · ${icon("list-ul")} <a href="/docs/${escapeHtml(packageName)}/enums" class="text-brand hover:text-brand-dark">All ${escapeHtml(packageName)} choices</a> · ${icon("box")} <a href="/docs/${escapeHtml(packageName)}" class="text-brand hover:text-brand-dark">${escapeHtml(packageName)} package</a></p>
     </article>
     <article class="${cls.panel}">
       ${panelHeading("tags", "Allowed values")}
@@ -177,7 +177,7 @@ export function renderEnumDocs(
     </article>
     <article class="${cls.panel} bg-zinc-50">
       ${panelHeading("circle-info", "Usage")}
-      <p class="${cls.meta} mb-3">Use any of these string values when a field or parameter has type <code class="rounded bg-white px-1.5 py-0.5 font-mono text-sm ring-1 ring-zinc-200">${escapeHtml(enumDoc.qualifiedName)}</code>.</p>
+      <p class="${cls.meta} mb-3">When a field uses this type, send one of these exact string values.</p>
       ${codeBlock(JSON.stringify(enumDoc.values[0] ?? "VALUE", null, 2))}
     </article>`,
     {
